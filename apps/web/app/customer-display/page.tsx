@@ -5,6 +5,8 @@ import { subscribeDisplay, type DisplayState } from "@/lib/customer-display";
 import { formatCurrency } from "@/lib/format";
 import { playPaymentReceived } from "@/lib/celebrate";
 import { QRCodeSVG } from "qrcode.react";
+import { useBranch } from "@/hooks/use-branch";
+import { useDisplaySettings } from "@/hooks/use-settings";
 
 /**
  * Open this on the customer-facing screen (or second monitor):
@@ -13,6 +15,9 @@ import { QRCodeSVG } from "qrcode.react";
  */
 export default function CustomerDisplayPage() {
   const [state, setState] = useState<DisplayState>({ kind: "idle" });
+  const { branchId } = useBranch();
+  const { data: displaySettings } = useDisplaySettings(branchId);
+  const restaurant = displaySettings?.restaurant;
   useEffect(() => subscribeDisplay(setState), []);
 
   // Chime when the payment lands. Browsers only allow audio after a click on
@@ -40,8 +45,12 @@ export default function CustomerDisplayPage() {
         </p>
       )}
       {state.kind === "idle" && (
-        <div className="m-auto text-center">
-          <p className="text-5xl font-semibold tracking-tight">Welcome</p>
+        <div className="m-auto text-center flex flex-col items-center">
+          {restaurant?.logoUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={restaurant.logoUrl} alt="" className="h-24 w-24 object-contain rounded-md mb-6" />
+          )}
+          <p className="text-5xl font-bold tracking-tight">{restaurant?.name ?? "Welcome"}</p>
           <p className="mt-3 text-xl text-muted-foreground">Your order will appear here</p>
         </div>
       )}

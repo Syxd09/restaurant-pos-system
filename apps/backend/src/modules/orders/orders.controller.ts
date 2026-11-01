@@ -455,7 +455,7 @@ export class OrdersController {
       await this.ordersService.recordBillPrinted(branchId, id, user.id);
     }
     const html = buildReceiptHtml({
-      restaurantName: order.branch.restaurant.name,
+      restaurantName: order.branch.restaurant.legalName || order.branch.restaurant.name,
       currency: order.branch.restaurant.currency,
       branch: {
         name: order.branch.name,
@@ -635,7 +635,7 @@ export class OrdersController {
           })
         : stored;
     const job = buildReceiptEscPosJob({
-      restaurantName: order.branch.restaurant.name,
+      restaurantName: order.branch.restaurant.legalName || order.branch.restaurant.name,
       currency: order.branch.restaurant.currency,
       branch: {
         name: order.branch.name,

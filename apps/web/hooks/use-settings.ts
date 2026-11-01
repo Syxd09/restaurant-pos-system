@@ -8,6 +8,7 @@ import type {
 } from "@nodedr-restaurant/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { setActiveCurrency } from "@/lib/format";
 
 export interface RestaurantSettings {
   id: string;
@@ -58,10 +59,15 @@ export interface BranchSettings {
 export function useSettings(branchId: string | null) {
   return useQuery({
     queryKey: ["settings", branchId],
-    queryFn: () =>
-      api.get<{ restaurant: RestaurantSettings; branch: BranchSettings }>(
+    queryFn: async () => {
+      const res = await api.get<{ restaurant: RestaurantSettings; branch: BranchSettings }>(
         `/settings?branchId=${branchId}`,
-      ),
+      );
+      if (res?.restaurant?.currency) {
+        setActiveCurrency(res.restaurant.currency);
+      }
+      return res;
+    },
     enabled: !!branchId,
   });
 }
@@ -83,10 +89,15 @@ export type DisplayBranch = Pick<
 export function useDisplaySettings(branchId: string | null) {
   return useQuery({
     queryKey: ["settings", branchId, "display"],
-    queryFn: () =>
-      api.get<{ restaurant: DisplayRestaurant; branch: DisplayBranch }>(
+    queryFn: async () => {
+      const res = await api.get<{ restaurant: DisplayRestaurant; branch: DisplayBranch }>(
         `/settings/display?branchId=${branchId}`,
-      ),
+      );
+      if (res?.restaurant?.currency) {
+        setActiveCurrency(res.restaurant.currency);
+      }
+      return res;
+    },
     enabled: !!branchId,
   });
 }
@@ -95,11 +106,19 @@ export function useUpdateRestaurantSettings(branchId: string | null) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (dto: RestaurantSettingsDto) => api.patch("/settings/restaurant", dto),
-    onSuccess: async () => {
+    onSuccess: async (data: any, variables) => {
+      if (variables?.currency) {
+        setActiveCurrency(variables.currency);
+      } else if (data?.currency) {
+        setActiveCurrency(data.currency);
+      }
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["settings"] }),
         queryClient.invalidateQueries({ queryKey: ["branches"] }),
         queryClient.invalidateQueries({ queryKey: ["auth"] }),
+        queryClient.invalidateQueries({ queryKey: ["floors"] }),
+        queryClient.invalidateQueries({ queryKey: ["orders"] }),
+        queryClient.invalidateQueries({ queryKey: ["dashboard"] }),
       ]);
     },
   });
@@ -125,6 +144,8 @@ export function useUpdateBranchSettings(branchId: string | null) {
         queryClient.invalidateQueries({ queryKey: ["settings"] }),
         queryClient.invalidateQueries({ queryKey: ["branches"] }),
         queryClient.invalidateQueries({ queryKey: ["floors", branchId] }),
+        queryClient.invalidateQueries({ queryKey: ["orders"] }),
+        queryClient.invalidateQueries({ queryKey: ["dashboard"] }),
       ]);
     },
   });

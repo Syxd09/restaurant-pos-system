@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ImagePlus, Save, ShieldCheck, X } from "lucide-react";
+import { Check, DollarSign, ImagePlus, Percent, Save, ShieldCheck, ShoppingBag, Utensils, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "@/lib/toast";
 import {
@@ -17,7 +17,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { StatusNote, useNoteToast } from "@/components/ui/status-note";
 import {
   Select,
   SelectContent,
@@ -38,6 +37,7 @@ import {
   type RestaurantSettings,
 } from "@/hooks/use-settings";
 import { ApiError } from "@/lib/api";
+import { formatCurrency, getCurrencySymbol } from "@/lib/format";
 
 export default function SettingsPage() {
   const { branchId } = useBranch();
@@ -68,7 +68,14 @@ export default function SettingsPage() {
         />
       )}
 
-      {data && <OnlineOrdersCard key={data.branch.id} branchId={branchId} branch={data.branch} />}
+      {data && (
+        <OnlineOrdersCard
+          key={`online-${data.restaurant.id}-${data.branch.id}`}
+          branchId={branchId}
+          branch={data.branch}
+          restaurant={data.restaurant}
+        />
+      )}
 
       {data && <KioskCard key={`kiosk-${data.branch.id}`} branchId={branchId} branch={data.branch} />}
 
@@ -94,54 +101,193 @@ export default function SettingsPage() {
 function OnlineOrdersCard({
   branchId,
   branch,
+  restaurant,
 }: {
   branchId: string | null;
-  branch: { autoConfirmOrders: boolean; autoConfirmReservations: boolean };
+  branch: BranchSettings;
+  restaurant: RestaurantSettings;
 }) {
-  const update = useUpdateBranchSettings(branchId);
-  const save = (dto: { autoConfirmOrders?: boolean; autoConfirmReservations?: boolean }) =>
-    update.mutate(dto, {
-      onSuccess: () => toast.success("Online order preferences saved"),
-      onError: (err) => toast.error(err instanceof Error ? err.message : "Could not save"),
-    });
+  const updateBranch = useUpdateBranchSettings(branchId);
+  const updateRestaurant = useUpdateRestaurantSettings(branchId);
+
+  const [autoOrders, setAutoOrders] = useState(branch.autoConfirmOrders);
+  const [autoBookings, setAutoBookings] = useState(branch.autoConfirmReservations);
+  const [minOrder, setMinOrder] = useState(String(Number(restaurant.onlineMinOrderAmount ?? 0)));
+  const initialAdj = Number(restaurant.onlinePriceAdjustValue ?? 0);
+  const [adjustKind, setAdjustKind] = useState<"PERCENT" | "AMOUNT">(restaurant.onlinePriceAdjustKind ?? "PERCENT");
+  const [adjustDir, setAdjustDir] = useState<"cheaper" | "costlier">(initialAdj < 0 ? "cheaper" : "costlier");
+  const [adjustValue, setAdjustValue] = useState(String(Math.abs(initialAdj)));
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    setAutoOrders(branch.autoConfirmOrders);
+    setAutoBookings(branch.autoConfirmReservations);
+    setMinOrder(String(Number(restaurant.onlineMinOrderAmount ?? 0)));
+    const adj = Number(restaurant.onlinePriceAdjustValue ?? 0);
+    setAdjustKind(restaurant.onlinePriceAdjustKind ?? "PERCENT");
+    setAdjustDir(adj < 0 ? "cheaper" : "costlier");
+    setAdjustValue(String(Math.abs(adj)));
+  }, [branch, restaurant]);
+
+  const currencySymbol = getCurrencySymbol(restaurant.currency);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      const val = (adjustDir === "cheaper" ? -1 : 1) * Math.abs(Number(adjustValue) || 0);
+      await Promise.all([
+        updateBranch.mutateAsync({
+          autoConfirmOrders: autoOrders,
+          autoConfirmReservations: autoBookings,
+        }),
+        updateRestaurant.mutateAsync({
+          onlineMinOrderAmount: Math.max(Number(minOrder) || 0, 0),
+          onlinePriceAdjustKind: adjustKind,
+          onlinePriceAdjustValue: val,
+        }),
+      ]);
+      toast.success("Online order preferences and pricing saved successfully!");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not save online order settings");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Preview computation
+  const sampleBase = 100;
+  const numAdj = Math.abs(Number(adjustValue) || 0);
+  const previewPrice =
+    adjustDir === "cheaper"
+      ? adjustKind === "PERCENT"
+        ? sampleBase * (1 - numAdj / 100)
+        : Math.max(sampleBase - numAdj, 0)
+      : adjustKind === "PERCENT"
+        ? sampleBase * (1 + numAdj / 100)
+        : sampleBase + numAdj;
 
   return (
-    <Card className="flex flex-col gap-4 p-6 rounded-lg border border-border/80">
-      <div>
-        <h2 className="text-[18px] font-semibold text-foreground">Online Orders &amp; Table Bookings</h2>
+    <Card className="flex flex-col gap-5 p-6 rounded-lg border border-border/80">
+      <div className="flex flex-col gap-1">
+        <h2 className="text-[18px] font-semibold text-foreground">Online Orders &amp; Digital Menu Catalog</h2>
         <p className="text-sm text-muted-foreground">
-          Choose whether orders and bookings from your customer portal are accepted automatically or wait for
-          kitchen staff approval.
+          Configure how orders and table bookings from your customer QR portal and website are accepted and priced.
         </p>
       </div>
-      <div className="flex items-center justify-between gap-4 rounded-md border border-border p-4 bg-secondary/20">
-        <div className="flex flex-col gap-0.5">
-          <Label htmlFor="auto-confirm-orders" className="text-sm font-medium">Auto-confirm online orders</Label>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="flex items-center justify-between gap-4 rounded-md border border-border p-4 bg-secondary/20">
+          <div className="flex flex-col gap-0.5">
+            <Label htmlFor="auto-confirm-orders" className="text-sm font-medium">Auto-confirm online orders</Label>
+            <p className="text-xs text-muted-foreground">
+              Off = rings and waits for staff approval. On = dispatched directly to kitchen KDS.
+            </p>
+          </div>
+          <Switch
+            id="auto-confirm-orders"
+            checked={autoOrders}
+            disabled={isSaving}
+            onCheckedChange={setAutoOrders}
+          />
+        </div>
+
+        <div className="flex items-center justify-between gap-4 rounded-md border border-border p-4 bg-secondary/20">
+          <div className="flex flex-col gap-0.5">
+            <Label htmlFor="auto-confirm-bookings" className="text-sm font-medium">Auto-confirm table bookings</Label>
+            <p className="text-xs text-muted-foreground">
+              Off = wait for staff confirmation. On = immediately reserved for free tables.
+            </p>
+          </div>
+          <Switch
+            id="auto-confirm-bookings"
+            checked={autoBookings}
+            disabled={isSaving}
+            onCheckedChange={setAutoBookings}
+          />
+        </div>
+      </div>
+
+      {/* Online Pricing & Minimum Order */}
+      <div className="flex flex-col gap-4 border-t border-border/60 pt-4">
+        <div className="flex flex-col gap-1">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Online &amp; QR Pricing Adjustments</h3>
           <p className="text-xs text-muted-foreground">
-            Off = each new order rings and waits for staff to Accept or Reject before printing to the kitchen. On = sent to the kitchen immediately.
+            Adjust menu prices specifically for online and table QR orders (e.g. commission markup or promo discount).
           </p>
         </div>
-        <Switch
-          id="auto-confirm-orders"
-          checked={branch.autoConfirmOrders}
-          disabled={update.isPending}
-          onCheckedChange={(v) => save({ autoConfirmOrders: v })}
-        />
-      </div>
-      <div className="flex items-center justify-between gap-4 rounded-md border border-border p-4 bg-secondary/20">
-        <div className="flex flex-col gap-0.5">
-          <Label htmlFor="auto-confirm-bookings" className="text-sm font-medium">Auto-confirm table bookings</Label>
-          <p className="text-xs text-muted-foreground">
-            Off = new table bookings wait for staff acceptance. On = automatically confirmed for available tables.
-          </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="online-min-order" className="text-xs font-medium">Minimum Order Amount</Label>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground font-semibold">{currencySymbol}</span>
+              <Input
+                id="online-min-order"
+                type="number"
+                min="0"
+                step="1"
+                value={minOrder}
+                onChange={(e) => setMinOrder(e.target.value)}
+                className="h-9 text-xs"
+                placeholder="0 = no minimum"
+              />
+            </div>
+            <p className="text-[11px] text-muted-foreground">Orders below this cannot be placed online.</p>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label className="text-xs font-medium">Adjustment Direction</Label>
+            <Select value={adjustDir} onValueChange={(v) => setAdjustDir(v as "cheaper" | "costlier")}>
+              <SelectTrigger className="h-9 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="costlier" className="text-xs">+ Markup (Online items cost more)</SelectItem>
+                <SelectItem value="cheaper" className="text-xs">− Discount (Online items cost less)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="online-adjust-val" className="text-xs font-medium">Adjustment Rate</Label>
+            <div className="flex items-center gap-2">
+              <Select value={adjustKind} onValueChange={(v) => setAdjustKind(v as "PERCENT" | "AMOUNT")}>
+                <SelectTrigger className="h-9 w-24 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="PERCENT" className="text-xs">Percent (%)</SelectItem>
+                  <SelectItem value="AMOUNT" className="text-xs">Flat ({currencySymbol})</SelectItem>
+                </SelectContent>
+              </Select>
+              <Input
+                id="online-adjust-val"
+                type="number"
+                min="0"
+                step={adjustKind === "PERCENT" ? "1" : "0.5"}
+                value={adjustValue}
+                onChange={(e) => setAdjustValue(e.target.value)}
+                className="h-9 text-xs font-semibold"
+                placeholder="0"
+              />
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              {numAdj > 0
+                ? `Live Preview: A ${formatCurrency(100)} dish sells for ${formatCurrency(previewPrice)} online`
+                : "No adjustment (standard dine-in prices apply)"}
+            </p>
+          </div>
         </div>
-        <Switch
-          id="auto-confirm-bookings"
-          checked={branch.autoConfirmReservations}
-          disabled={update.isPending}
-          onCheckedChange={(v) => save({ autoConfirmReservations: v })}
-        />
       </div>
+
+      <Button
+        type="button"
+        onClick={handleSave}
+        disabled={isSaving || updateBranch.isPending || updateRestaurant.isPending}
+        className="self-start h-9 text-xs font-semibold shadow-xs"
+      >
+        {isSaving ? "Saving Online Settings…" : "Save Online Order Settings"}
+      </Button>
     </Card>
   );
 }
@@ -202,11 +348,6 @@ function GeneralSettingsForm({
   const [referralSharerPoints, setReferralSharerPoints] = useState(String(restaurant.referralSharerPoints ?? 15));
   const [referralReferredPoints, setReferralReferredPoints] = useState(String(restaurant.referralReferredPoints ?? 10));
   const [referralMinPurchase, setReferralMinPurchase] = useState(String(Number(restaurant.referralMinPurchase ?? 200)));
-  const [onlineMinOrder, setOnlineMinOrder] = useState(String(Number(restaurant.onlineMinOrderAmount ?? 0)));
-  const initialAdjust = Number(restaurant.onlinePriceAdjustValue ?? 0);
-  const [adjustKind, setAdjustKind] = useState<"PERCENT" | "AMOUNT">(restaurant.onlinePriceAdjustKind ?? "PERCENT");
-  const [adjustDir, setAdjustDir] = useState<"cheaper" | "costlier">(initialAdjust < 0 ? "cheaper" : "costlier");
-  const [adjustValue, setAdjustValue] = useState(String(Math.abs(initialAdjust)));
   const [maxDiscount, setMaxDiscount] = useState(String(Number(restaurant.maxManualDiscountPercent ?? 100)));
   const [requireReason, setRequireReason] = useState(!!restaurant.requireDiscountReason);
   const logoInputRef = useRef<HTMLInputElement>(null);
@@ -244,11 +385,6 @@ function GeneralSettingsForm({
     setReferralSharerPoints(String(restaurant.referralSharerPoints ?? 15));
     setReferralReferredPoints(String(restaurant.referralReferredPoints ?? 10));
     setReferralMinPurchase(String(Number(restaurant.referralMinPurchase ?? 200)));
-    setOnlineMinOrder(String(Number(restaurant.onlineMinOrderAmount ?? 0)));
-    const adj = Number(restaurant.onlinePriceAdjustValue ?? 0);
-    setAdjustKind(restaurant.onlinePriceAdjustKind ?? "PERCENT");
-    setAdjustDir(adj < 0 ? "cheaper" : "costlier");
-    setAdjustValue(String(Math.abs(adj)));
     setMaxDiscount(String(Number(restaurant.maxManualDiscountPercent ?? 100)));
     setRequireReason(!!restaurant.requireDiscountReason);
 
@@ -278,9 +414,6 @@ function GeneralSettingsForm({
       referralSharerPoints: Math.max(Math.floor(Number(referralSharerPoints) || 0), 0),
       referralReferredPoints: Math.max(Math.floor(Number(referralReferredPoints) || 0), 0),
       referralMinPurchase: Math.max(Number(referralMinPurchase) || 0, 0),
-      onlineMinOrderAmount: Math.max(Number(onlineMinOrder) || 0, 0),
-      onlinePriceAdjustKind: adjustKind,
-      onlinePriceAdjustValue: (adjustDir === "cheaper" ? -1 : 1) * Math.abs(Number(adjustValue) || 0),
       maxManualDiscountPercent: Math.min(Math.max(Number(maxDiscount) || 0, 0), 100),
       requireDiscountReason: requireReason,
     });
@@ -292,7 +425,7 @@ function GeneralSettingsForm({
       address: address.trim() || undefined,
       phone: phone.trim() || undefined,
       gstNumber: gstNumber.trim() || undefined,
-      country: country.trim().slice(0, 2).toUpperCase(),
+      country: country.trim().slice(0, 2).toUpperCase() || preset.defaultCountry,
       taxRegime,
       taxMode,
       taxLabel: taxLabel.trim() || null,
@@ -304,7 +437,7 @@ function GeneralSettingsForm({
     e.preventDefault();
     try {
       await saveRestaurantData();
-      toast.success("Restaurant details saved successfully!");
+      toast.success("Restaurant profile saved successfully!");
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : "Could not save restaurant settings");
     }
@@ -359,7 +492,7 @@ function GeneralSettingsForm({
           <ShieldCheck className="h-4 w-4 text-primary" />
           <span className="text-xs font-semibold text-foreground">Save Configuration</span>
           <span className="text-[11px] text-muted-foreground hidden sm:inline">
-            Applies changes to restaurant name, branding, branch layout, and tax policies
+            Applies changes to restaurant name, currency, branch details, and tax policies
           </span>
         </div>
         <Button
@@ -471,6 +604,7 @@ function GeneralSettingsForm({
                 placeholder="e.g. Acme Hospitality Pvt Ltd"
                 className="h-9 text-xs"
               />
+              <p className="text-[11px] text-muted-foreground">Printed on official receipts, tax invoices, and legal compliance reports.</p>
             </div>
 
             {/* Currency & Timezone */}
@@ -484,7 +618,7 @@ function GeneralSettingsForm({
                   maxLength={3}
                   required
                   className="h-9 text-xs font-mono font-semibold"
-                  placeholder="INR, USD, EUR"
+                  placeholder="INR, USD, EUR, GBP, AED"
                 />
               </div>
               <div className="flex flex-col gap-1.5">
@@ -495,7 +629,7 @@ function GeneralSettingsForm({
                   onChange={(e) => setTimezone(e.target.value)}
                   required
                   className="h-9 text-xs"
-                  placeholder="Asia/Kolkata, UTC"
+                  placeholder="Asia/Kolkata, UTC, America/New_York"
                 />
               </div>
             </div>
@@ -571,6 +705,67 @@ function GeneralSettingsForm({
               </div>
             </div>
 
+            {/* Referral Program */}
+            <div className="flex flex-col gap-3 border-t border-border/60 pt-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Customer Referral Rewards</h3>
+                  <p className="text-[11px] text-muted-foreground">Reward loyal guests who invite friends to your restaurant</p>
+                </div>
+                <Switch
+                  checked={referralEnabled}
+                  onCheckedChange={setReferralEnabled}
+                  aria-label="Toggle referral rewards"
+                />
+              </div>
+
+              {referralEnabled && (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 rounded-md border border-border/60 bg-secondary/15">
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="r-ref-sharer" className="text-xs font-medium">Referrer Reward</Label>
+                    <Input
+                      id="r-ref-sharer"
+                      type="number"
+                      min="0"
+                      value={referralSharerPoints}
+                      onChange={(e) => setReferralSharerPoints(e.target.value)}
+                      className="h-9 text-xs"
+                      placeholder="15 pts"
+                    />
+                    <p className="text-[10px] text-muted-foreground">Points for referring customer</p>
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="r-ref-referred" className="text-xs font-medium">New Guest Reward</Label>
+                    <Input
+                      id="r-ref-referred"
+                      type="number"
+                      min="0"
+                      value={referralReferredPoints}
+                      onChange={(e) => setReferralReferredPoints(e.target.value)}
+                      className="h-9 text-xs"
+                      placeholder="10 pts"
+                    />
+                    <p className="text-[10px] text-muted-foreground">Welcome points for new guest</p>
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="r-ref-min" className="text-xs font-medium">Min Qualifying Spend</Label>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs text-muted-foreground font-mono">{currency}</span>
+                      <Input
+                        id="r-ref-min"
+                        type="number"
+                        min="0"
+                        value={referralMinPurchase}
+                        onChange={(e) => setReferralMinPurchase(e.target.value)}
+                        className="h-9 text-xs font-semibold"
+                      />
+                    </div>
+                    <p className="text-[10px] text-muted-foreground">First order value required</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Cashier Discount Limit */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 border-t border-border/60 pt-3">
               <div className="flex flex-col gap-1.5">
@@ -583,8 +778,9 @@ function GeneralSettingsForm({
                   step="0.01"
                   value={maxDiscount}
                   onChange={(e) => setMaxDiscount(e.target.value)}
-                  className="h-9 text-xs"
+                  className="h-9 text-xs font-semibold"
                 />
+                <p className="text-[11px] text-muted-foreground">Cap on manual cashier discounts at checkout.</p>
               </div>
               <label className="flex items-start gap-2 text-xs sm:pt-6 cursor-pointer">
                 <input

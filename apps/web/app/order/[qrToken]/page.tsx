@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/lib/i18n/context";
 import { api, ApiError } from "@/lib/api";
 import { playSuccessChime, vibrateSuccess } from "@/lib/celebrate";
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency, setActiveCurrency } from "@/lib/format";
 
 interface PublicMenuItem {
   id: string;
@@ -70,6 +70,10 @@ interface PublicMenuCategory {
 }
 
 interface PublicMenuResponse {
+  restaurantName?: string;
+  logoUrl?: string | null;
+  currency?: string;
+  onlineMinOrderAmount?: number;
   branchName: string;
   tableName: string;
   categories: PublicMenuCategory[];
@@ -117,6 +121,10 @@ export default function PublicMenuPage({
     queryFn: () => api.get<PublicMenuResponse>(`/public/menu/${qrToken}`),
     retry: false,
   });
+
+  useEffect(() => {
+    if (data?.currency) setActiveCurrency(data.currency);
+  }, [data?.currency]);
 
   // Live status of the table's tab and any pending waiter/bill request.
   const { data: status } = useQuery({
@@ -230,11 +238,20 @@ export default function PublicMenuPage({
         {isLoading ? (
           <Skeleton className="h-7 w-40" />
         ) : (
-          <div>
+          <div className="flex flex-col items-center gap-1">
+            {data?.logoUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={data.logoUrl} alt="" className="h-12 w-12 object-contain rounded-md mb-1" />
+            )}
+            {data?.restaurantName && (
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                {data.restaurantName}
+              </p>
+            )}
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">
               {data?.branchName}
             </h1>
-            <p className="mt-1 text-sm text-muted-foreground">{data?.tableName}</p>
+            <p className="text-sm text-muted-foreground">{data?.tableName}</p>
           </div>
         )}
         <form
@@ -272,12 +289,21 @@ export default function PublicMenuPage({
         {isLoading ? (
           <Skeleton className="mx-auto h-7 w-40" />
         ) : (
-          <>
+          <div className="flex flex-col items-center gap-1.5">
+            {data?.logoUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={data.logoUrl} alt="" className="h-10 w-10 object-contain rounded-md" />
+            )}
+            {data?.restaurantName && (
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                {data.restaurantName}
+              </p>
+            )}
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">
               {data?.branchName}
             </h1>
-            <p className="mt-1 text-sm text-muted-foreground">{data?.tableName}</p>
-          </>
+            <p className="text-sm text-muted-foreground">{data?.tableName}</p>
+          </div>
         )}
       </header>
 
@@ -422,15 +448,26 @@ export default function PublicMenuPage({
       {cartCount > 0 && (
         <div className="fixed inset-x-0 bottom-0 border-t border-border bg-background px-5 py-4 shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
           <div className="mx-auto flex max-w-lg items-center gap-3">
-            <Button
-              className="h-12 flex-1"
-              disabled={placeOrder.isPending}
-              onClick={() => placeOrder.mutate()}
-            >
-              {placeOrder.isPending
-                ? t("order.placingOrder")
-                : `${t("order.placeOrder")} — ${cartCount} ${cartCount > 1 ? t("order.items") : t("order.item")} · ${formatCurrency(cartTotal)}`}
-            </Button>
+            {data?.onlineMinOrderAmount && cartTotal < data.onlineMinOrderAmount ? (
+              <div className="flex flex-col gap-1 w-full">
+                <Button className="h-12 w-full font-semibold" disabled>
+                  {`Add ${formatCurrency(data.onlineMinOrderAmount - cartTotal)} more (Min: ${formatCurrency(data.onlineMinOrderAmount)})`}
+                </Button>
+                <p className="text-[11px] text-muted-foreground text-center">
+                  Minimum online order amount is {formatCurrency(data.onlineMinOrderAmount)}
+                </p>
+              </div>
+            ) : (
+              <Button
+                className="h-12 flex-1 font-semibold"
+                disabled={placeOrder.isPending}
+                onClick={() => placeOrder.mutate()}
+              >
+                {placeOrder.isPending
+                  ? t("order.placingOrder")
+                  : `${t("order.placeOrder")} — ${cartCount} ${cartCount > 1 ? t("order.items") : t("order.item")} · ${formatCurrency(cartTotal)}`}
+              </Button>
+            )}
           </div>
           {placeOrder.isError && (
             <p className="mx-auto mt-2 max-w-lg text-center text-xs text-destructive">

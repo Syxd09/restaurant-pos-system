@@ -28,6 +28,13 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
   USD: '$',
   EUR: '€',
   GBP: '£',
+  AED: 'AED ',
+  CAD: 'CA$',
+  AUD: 'A$',
+  SGD: 'S$',
+  JPY: '¥',
+  CNY: '¥',
+  CHF: 'CHF ',
 };
 
 function esc(value: string | number | null | undefined): string {

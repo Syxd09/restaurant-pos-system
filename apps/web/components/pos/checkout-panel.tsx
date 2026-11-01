@@ -28,7 +28,7 @@ import { usePrintKot, usePrintOrderUsb, type PrintJobResult } from "@/hooks/use-
 import { useDisplaySettings } from "@/hooks/use-settings";
 import { api, ApiError } from "@/lib/api";
 import { discountSummary, parseMoney, planPayment } from "@/lib/bill";
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency, getCurrencySymbol } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { publishDisplay } from "@/lib/customer-display";
 import { playPaymentReceived } from "@/lib/celebrate";
@@ -240,6 +240,18 @@ export function CheckoutPanel({
 
   const handleCheckout = () => {
     if (!bill || repricing) return;
+    const maxAllowed = Number(settings?.restaurant.maxManualDiscountPercent ?? 100);
+    const requireReason = Boolean(settings?.restaurant.requireDiscountReason);
+    if (!locked && Number(discountValue) > 0) {
+      if (discountMode === "PERCENT" && Number(discountValue) > maxAllowed) {
+        toast.error(`Discount cannot exceed the restaurant maximum of ${maxAllowed}%`);
+        return;
+      }
+      if (requireReason && !discountReason.trim()) {
+        toast.error("Please enter a reason for this discount (required by restaurant policy)");
+        return;
+      }
+    }
     const payments =
       plan.applied > 0
         ? [
@@ -491,7 +503,7 @@ export function CheckoutPanel({
                     discountMode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary",
                   )}
                 >
-                  {m === "PERCENT" ? "%" : "₹ Cash"}
+                  {m === "PERCENT" ? "%" : `${getCurrencySymbol(settings?.restaurant?.currency)} Cash`}
                 </button>
               ))}
             </div>
@@ -500,13 +512,18 @@ export function CheckoutPanel({
             id="discount"
             type="number"
             min="0"
-            max={discountMode === "PERCENT" ? 100 : undefined}
+            max={discountMode === "PERCENT" ? Number(settings?.restaurant.maxManualDiscountPercent ?? 100) : undefined}
             inputMode="decimal"
             className="h-11"
             value={discountValue}
             disabled={locked || !canDiscount}
             onChange={(e) => setDiscountValue(e.target.value)}
           />
+          {discountMode === "PERCENT" && Number(discountValue) > Number(settings?.restaurant.maxManualDiscountPercent ?? 100) && (
+            <p className="text-[11px] text-destructive">
+              Exceeds restaurant maximum of {settings?.restaurant.maxManualDiscountPercent}%
+            </p>
+          )}
           {canDiscount && !locked && (
             <div className="flex flex-wrap gap-1.5" role="group" aria-label="Discount presets">
               {(discountMode === "PERCENT" ? [5, 10, 15, 20] : [10, 20, 50, 100]).map((v) => (
@@ -516,7 +533,7 @@ export function CheckoutPanel({
                   onClick={() => setDiscountValue(String(v))}
                   className="min-h-7 rounded-sm border border-border/80 bg-card px-2.5 text-xs font-medium text-foreground transition-all hover:bg-secondary hover:border-border shadow-2xs"
                 >
-                  {discountMode === "PERCENT" ? `${v}%` : `₹${v}`}
+                  {discountMode === "PERCENT" ? `${v}%` : `${getCurrencySymbol(settings?.restaurant?.currency)}${v}`}
                 </button>
               ))}
             </div>
@@ -527,7 +544,7 @@ export function CheckoutPanel({
           {canDiscount && !locked && Number(discountValue) > 0 && (
             <Input
               aria-label="Discount reason"
-              placeholder="Reason for discount"
+              placeholder={settings?.restaurant.requireDiscountReason ? "Reason for discount (Required by policy) *" : "Reason for discount"}
               maxLength={200}
               className="h-9 text-sm"
               value={discountReason}

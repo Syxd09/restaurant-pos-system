@@ -16,8 +16,9 @@ import {
   type RiderCard,
 } from "@/hooks/use-rider";
 import { ApiError } from "@/lib/api";
+import { formatCurrency } from "@/lib/format";
 
-const money = (n: number) => `₹${Number.isInteger(n) ? n : n.toFixed(2)}`;
+const money = (n: number) => formatCurrency(n);
 const FAIL_REASONS = ["Customer not reachable", "Wrong or incomplete address", "Customer refused the order", "Could not find the place"];
 
 /** Shares the phone's position every ~20 s while the rider is on duty. */

@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { adjustOnlinePrice, onlinePriceAdjustOf } from '../../common/online-price';
 import type { CartItemDto } from '@nodedr-restaurant/types';
 import { NotificationsService } from '../../notifications/notifications.service';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -17,7 +18,7 @@ export class PublicMenuService {
   private async resolveTable(qrToken: string) {
     const table = await this.prisma.table.findUnique({
       where: { qrToken },
-      include: { floor: { include: { branch: true } } },
+      include: { floor: { include: { branch: { include: { restaurant: true } } } } },
     });
     if (!table) throw new NotFoundException('This QR code is not recognized');
     return table;
@@ -26,8 +27,24 @@ export class PublicMenuService {
   async getMenuByQrToken(qrToken: string) {
     const table = await this.resolveTable(qrToken);
     const branch = table.floor.branch;
-    const categories = await this.menuCategoriesForBranch(branch.id);
+    const restaurant = branch.restaurant;
+    const adjust = onlinePriceAdjustOf(restaurant);
+    const rawCategories = await this.menuCategoriesForBranch(branch.id);
+    const categories = rawCategories.map((cat) => ({
+      ...cat,
+      items: cat.items.map((item) => ({
+        ...item,
+        price:
+          adjust && item.price != null
+            ? String(adjustOnlinePrice(Number(item.price), adjust))
+            : String(item.price),
+      })),
+    }));
     return {
+      restaurantName: restaurant.name,
+      logoUrl: restaurant.logoUrl,
+      currency: restaurant.currency,
+      onlineMinOrderAmount: Number(restaurant.onlineMinOrderAmount || 0),
       branchName: branch.name,
       tableName: table.name ?? `Table ${table.number}`,
       categories,
@@ -120,6 +137,10 @@ export class PublicMenuService {
       );
     }
 
+    const restaurant = table.floor.branch.restaurant;
+    const adjust = onlinePriceAdjustOf(restaurant);
+    const minOrder = Number(restaurant.onlineMinOrderAmount || 0);
+
     return this.ordersService.createOrder(
       branchId,
       createdById,
@@ -129,7 +150,11 @@ export class PublicMenuService {
         guestName,
         items,
       },
-      { channel: 'ONLINE' },
+      {
+        channel: 'ONLINE',
+        priceAdjust: adjust,
+        minOrderAmount: minOrder > 0 ? minOrder : undefined,
+      },
     );
   }
 

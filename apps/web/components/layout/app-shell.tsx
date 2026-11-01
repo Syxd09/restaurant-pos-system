@@ -11,17 +11,12 @@ import { useDisplaySettings } from "@/hooks/use-settings";
 import { BrandFooter } from "./brand-footer";
 import { BranchSwitcher } from "./branch-switcher";
 import { LanguageSwitcher } from "./language-switcher";
+import { HeaderToolbar } from "./header-toolbar";
 import { Logo } from "./logo";
 import { MobileBottomNav } from "./mobile-bottom-nav";
 import { SidebarNav } from "./sidebar-nav";
 import { UserMenu } from "./user-menu";
 
-// The restaurant's own logo + name lead the sidebar header — this is
-// white-label self-hosted software, so the operator's branding takes the
-// prime spot an operator actually looks at. The Nodedr OrderRestro product
-// mark moves to a small credit line at the bottom (BrandFooter) instead of
-// competing with it up here. Falls back to the product mark only until the
-// restaurant sets its own logo/name under Settings.
 function RestaurantBrand() {
   const { branchId } = useBranch();
   const { data } = useDisplaySettings(branchId);
@@ -47,7 +42,7 @@ function RestaurantBrand() {
     <>
       <Logo />
       <span className="truncate text-sm font-semibold tracking-tight text-sidebar-foreground">
-        {restaurant?.name ?? "Nodedr OrderRestro"}
+        {restaurant?.name ?? "OrderRestro"}
       </span>
     </>
   );
@@ -66,10 +61,10 @@ export function AppShell({
     <div className="flex min-h-screen bg-background">
       {/* Desktop sidebar */}
       <aside className="hidden w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar lg:flex">
-        <div className="flex h-16 items-center gap-2 px-5">
+        <div className="flex h-16 items-center gap-2 px-5 border-b border-sidebar-border/40">
           <RestaurantBrand />
         </div>
-        <div className="px-3 pb-3">
+        <div className="px-3 py-3">
           <BranchSwitcher />
         </div>
         <div className="flex-1 overflow-y-auto py-2">
@@ -82,10 +77,10 @@ export function AppShell({
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent side="left" className="w-72 bg-sidebar p-0">
           <SheetTitle className="sr-only">Navigation</SheetTitle>
-          <div className="flex h-16 items-center gap-2 px-5">
+          <div className="flex h-16 items-center gap-2 px-5 border-b border-sidebar-border/40">
             <RestaurantBrand />
           </div>
-          <div className="px-3 pb-3">
+          <div className="px-3 py-3">
             <BranchSwitcher />
           </div>
           <div className="flex-1 overflow-y-auto py-2">
@@ -96,7 +91,7 @@ export function AppShell({
       </Sheet>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-16 shrink-0 items-center justify-between border-b border-border bg-background/80 px-4 backdrop-blur sm:px-6">
+        <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b border-border/80 bg-background/90 px-4 backdrop-blur-md sm:px-6 shadow-xs">
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
@@ -105,10 +100,13 @@ export function AppShell({
           >
             <Menu className="h-5 w-5" />
           </button>
-          <div className="hidden lg:block" />
-          <div className="flex items-center gap-1">
+          <div className="hidden lg:block">
+            <HeaderToolbar />
+          </div>
+          <div className="flex items-center gap-2">
             <LanguageSwitcher compact />
             <NotificationBell />
+            <div className="h-4 w-px bg-border/60 mx-1" />
             <UserMenu user={user} />
           </div>
         </header>

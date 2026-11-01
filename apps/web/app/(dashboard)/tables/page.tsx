@@ -228,3 +228,4 @@ function Legend({ color, label }: { color: string; label: string }) {
     </div>
   );
 }
+

@@ -1,6 +1,6 @@
 "use client";
 
-import { Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
+import { Bike, Minus, Plus, ShoppingBag, ShoppingCart, Trash2, Utensils } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -75,104 +75,162 @@ export function CartPanel({
   branchId?: string | null;
 }) {
   const subtotal = subtotalOf(lines.map((l) => l.unitPrice * l.quantity));
+  const totalItemCount = lines.reduce((acc, l) => acc + l.quantity, 0);
+
   const deliveryReady =
     orderType !== "DELIVERY" ||
-    (delivery.address.trim().length >= 5 && delivery.pincode.trim().length >= 3 && delivery.phone.trim().length >= 6);
+    (delivery.address.trim().length >= 5 &&
+      delivery.pincode.trim().length >= 3 &&
+      delivery.phone.trim().length >= 6);
+
   const canSubmit =
-    lines.length > 0 && (orderType !== "DINE_IN" || !!tableId) && deliveryReady && !isSubmitting && !checkingTable;
+    lines.length > 0 &&
+    (orderType !== "DINE_IN" || !!tableId) &&
+    deliveryReady &&
+    !isSubmitting &&
+    !checkingTable;
 
   return (
-    <div className="flex h-full flex-col gap-4">
-      <Tabs value={orderType} onValueChange={(v) => onOrderTypeChange(v as PosOrderType)}>
-        <TabsList className="w-full">
-          <TabsTrigger value="DINE_IN" className="flex-1">
-            Dine-in
+    <div className="flex h-full flex-col gap-3.5">
+      {/* Order Type Tabs */}
+      <Tabs
+        value={orderType}
+        onValueChange={(v) => onOrderTypeChange(v as PosOrderType)}
+      >
+        <TabsList className="grid w-full grid-cols-3 h-10 p-1 bg-secondary/80">
+          <TabsTrigger
+            value="DINE_IN"
+            className="flex items-center justify-center gap-1.5 text-xs font-semibold data-[state=active]:bg-card data-[state=active]:shadow-xs"
+          >
+            <Utensils className="h-3.5 w-3.5" />
+            <span>Dine-in</span>
           </TabsTrigger>
-          <TabsTrigger value="TAKEAWAY" className="flex-1">
-            Takeaway
+          <TabsTrigger
+            value="TAKEAWAY"
+            className="flex items-center justify-center gap-1.5 text-xs font-semibold data-[state=active]:bg-card data-[state=active]:shadow-xs"
+          >
+            <ShoppingBag className="h-3.5 w-3.5" />
+            <span>Takeaway</span>
           </TabsTrigger>
-          <TabsTrigger value="DELIVERY" className="flex-1">
-            Delivery
+          <TabsTrigger
+            value="DELIVERY"
+            className="flex items-center justify-center gap-1.5 text-xs font-semibold data-[state=active]:bg-card data-[state=active]:shadow-xs"
+          >
+            <Bike className="h-3.5 w-3.5" />
+            <span>Delivery</span>
           </TabsTrigger>
         </TabsList>
       </Tabs>
 
+      {/* Table Selector for Dine-in */}
       {orderType === "DINE_IN" && (
-        <Select value={tableId} onValueChange={(v) => onTableChange(v ?? "")}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select table">
-              {(value: string | null) => {
-                const t = tables.find((table) => table.id === value);
-                if (!t) return "Select table";
-                return `${t.name ?? `Table ${t.number}`}${t.status === "OCCUPIED" ? " (occupied)" : ""}`;
-              }}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {tables.map((t) => (
-              <SelectItem key={t.id} value={t.id}>
-                {t.name ?? `Table ${t.number}`} {t.status === "OCCUPIED" ? "(occupied)" : ""}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex flex-col gap-1">
+          <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-0.5">
+            Table Assignment
+          </label>
+          <Select value={tableId} onValueChange={(v) => onTableChange(v ?? "")}>
+            <SelectTrigger className="w-full h-10 text-xs font-medium bg-background/80">
+              <SelectValue placeholder="Select Table…">
+                {(value: string | null) => {
+                  const t = tables.find((table) => table.id === value);
+                  if (!t) return "Select Table…";
+                  return `${t.name ?? `Table ${t.number}`}${
+                    t.status === "OCCUPIED" ? " • Occupied" : " • Available"
+                  }`;
+                }}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {tables.map((t) => (
+                <SelectItem key={t.id} value={t.id} className="text-xs">
+                  <span className="font-semibold">{t.name ?? `Table ${t.number}`}</span>
+                  <span className="ml-1 text-muted-foreground">
+                    ({t.capacity} seats · {t.status.toLowerCase()})
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       )}
 
+      {/* Delivery Form */}
       {orderType === "DELIVERY" && (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 rounded-xl border border-border/70 bg-secondary/30 p-3">
           <Input
-            placeholder="Delivery address"
+            placeholder="Street address / landmark"
             value={delivery.address}
-            onChange={(e) => onDeliveryChange({ ...delivery, address: e.target.value })}
+            onChange={(e) =>
+              onDeliveryChange({ ...delivery, address: e.target.value })
+            }
+            className="h-9 text-xs"
           />
           <SavedAddressPicker
             branchId={branchId}
             phone={delivery.phone}
-            onPick={(address, pincode) => onDeliveryChange({ ...delivery, address, pincode })}
+            onPick={(address, pincode) =>
+              onDeliveryChange({ ...delivery, address, pincode })
+            }
           />
           <div className="grid grid-cols-2 gap-2">
             <Input
               placeholder="Pincode"
               inputMode="numeric"
               value={delivery.pincode}
-              onChange={(e) => onDeliveryChange({ ...delivery, pincode: e.target.value })}
+              onChange={(e) =>
+                onDeliveryChange({ ...delivery, pincode: e.target.value })
+              }
+              className="h-9 text-xs"
             />
             <Input
-              placeholder="Phone"
+              placeholder="Customer Phone"
               inputMode="tel"
               value={delivery.phone}
-              onChange={(e) => onDeliveryChange({ ...delivery, phone: e.target.value })}
+              onChange={(e) =>
+                onDeliveryChange({ ...delivery, phone: e.target.value })
+              }
+              className="h-9 text-xs"
             />
           </div>
         </div>
       )}
 
+      {/* Schedule Option for Non-Dine-in */}
       {orderType !== "DINE_IN" && (
-        <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+        <label className="flex flex-col gap-1 text-[11px] font-semibold text-muted-foreground">
           Schedule for later (optional)
           <Input
             type="datetime-local"
             value={scheduledFor}
             onChange={(e) => onScheduledForChange(e.target.value)}
+            className="h-9 text-xs"
           />
         </label>
       )}
 
       {checkingTable && (
-        <p role="status" className="rounded-lg bg-secondary/60 px-3 py-2 text-xs text-muted-foreground">
-          Checking this table&apos;s open bills…
+        <p
+          role="status"
+          className="rounded-xl bg-secondary/60 px-3 py-2 text-xs text-muted-foreground animate-pulse"
+        >
+          Checking active bills on this table…
         </p>
       )}
+
       {openBills && openBills.length > 1 && (
-        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground" role="group" aria-label="Open bills on this table">
-          <span>{openBills.length} open bills here — add to:</span>
+        <div
+          className="flex flex-wrap items-center gap-1.5 rounded-xl bg-secondary/40 p-2 text-xs text-muted-foreground"
+          role="group"
+          aria-label="Open bills on this table"
+        >
+          <span className="font-semibold text-foreground">Add to bill:</span>
           {openBills.map((b) => (
             <Button
               key={b.id}
               type="button"
               size="sm"
               variant={b.id === selectedBillId ? "default" : "outline"}
-              className="h-7 px-2 text-xs"
+              className="h-7 px-2.5 text-xs font-mono font-medium"
               aria-pressed={b.id === selectedBillId}
               onClick={() => onSelectBill?.(b.id)}
             >
@@ -181,72 +239,100 @@ export function CartPanel({
           ))}
         </div>
       )}
+
       {existingOrderNumber && (
-        <div className="flex items-center justify-between gap-3 rounded-lg bg-secondary/60 px-3 py-2 text-xs text-muted-foreground">
-          <span>
-            This table already has open order{" "}
-            <span className="font-medium text-foreground">#{existingOrderNumber}</span>
-            {lines.length > 0 && " — these items will be added to it as a new round."}
+        <div className="flex items-center justify-between gap-2 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-xs">
+          <span className="text-muted-foreground">
+            Active bill:{" "}
+            <span className="font-semibold text-foreground">
+              #{existingOrderNumber}
+            </span>
           </span>
           {onViewExistingOrder && (
             <Button
               type="button"
               variant="outline"
               size="sm"
-              className="h-7 shrink-0 px-2 text-xs"
+              className="h-7 shrink-0 text-xs font-semibold px-2.5"
               onClick={onViewExistingOrder}
             >
-              View & pay
+              View & Pay
             </Button>
           )}
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto">
+      {/* Cart Items List */}
+      <div className="flex-1 overflow-y-auto rounded-xl border border-border/60 bg-background/50 p-2">
         {lines.length === 0 ? (
-          <div className="flex h-full flex-col items-center justify-center gap-2 text-center text-muted-foreground">
-            <ShoppingCart className="h-8 w-8 opacity-40" />
-            <p className="text-sm">Cart is empty</p>
+          <div className="flex h-full min-h-[160px] flex-col items-center justify-center gap-2 text-center text-muted-foreground">
+            <div className="h-10 w-10 rounded-full bg-secondary/80 flex items-center justify-center">
+              <ShoppingCart className="h-5 w-5 opacity-40" />
+            </div>
+            <div>
+              <p className="text-xs font-medium text-foreground">Cart is empty</p>
+              <p className="text-[11px] text-muted-foreground">
+                Tap items on the left to add to order
+              </p>
+            </div>
           </div>
         ) : (
-          <div className="flex flex-col divide-y divide-border">
+          <div className="flex flex-col divide-y divide-border/60">
             {lines.map((line) => (
-              <div key={line.key} className="flex items-start justify-between gap-3 py-3">
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-foreground">{line.name}</p>
+              <div
+                key={line.key}
+                className="group flex items-start justify-between gap-2.5 py-2.5 px-1.5 transition-colors hover:bg-secondary/30 rounded-lg"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-foreground truncate">
+                    {line.name}
+                  </p>
                   {line.modifierLabel && (
-                    <p className="text-xs text-muted-foreground">{line.modifierLabel}</p>
+                    <span className="inline-block mt-0.5 rounded bg-secondary px-1.5 py-0.2 text-[10px] text-muted-foreground truncate max-w-full">
+                      {line.modifierLabel}
+                    </span>
                   )}
-                  <p className="mt-1 text-sm font-medium tabular-nums text-foreground">
+                  <p className="mt-1 text-xs font-bold tabular-nums text-foreground">
                     {formatCurrency(line.unitPrice * line.quantity)}
+                    {line.quantity > 1 && (
+                      <span className="ml-1 text-[10px] font-normal text-muted-foreground">
+                        ({formatCurrency(line.unitPrice)} each)
+                      </span>
+                    )}
                   </p>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-7 w-7"
-                    onClick={() => onDecrement(line.key)}
-                  >
-                    <Minus className="h-3 w-3" />
-                  </Button>
-                  <span className="w-5 text-center text-sm tabular-nums">{line.quantity}</span>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="h-7 w-7"
-                    onClick={() => onIncrement(line.key)}
-                  >
-                    <Plus className="h-3 w-3" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 text-muted-foreground hover:text-destructive"
+
+                {/* Quantity Controls Stepper */}
+                <div className="flex items-center gap-1 shrink-0">
+                  <div className="flex items-center rounded-lg border border-border bg-card p-0.5 shadow-xs">
+                    <button
+                      type="button"
+                      aria-label="Decrease quantity"
+                      className="flex h-6 w-6 items-center justify-center rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+                      onClick={() => onDecrement(line.key)}
+                    >
+                      <Minus className="h-3 w-3" />
+                    </button>
+                    <span className="w-5 text-center text-xs font-bold tabular-nums text-foreground">
+                      {line.quantity}
+                    </span>
+                    <button
+                      type="button"
+                      aria-label="Increase quantity"
+                      className="flex h-6 w-6 items-center justify-center rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+                      onClick={() => onIncrement(line.key)}
+                    >
+                      <Plus className="h-3 w-3" />
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    aria-label="Remove item"
+                    className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground/60 hover:text-destructive hover:bg-destructive/10 transition-colors"
                     onClick={() => onRemove(line.key)}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
+                  </button>
                 </div>
               </div>
             ))}
@@ -254,19 +340,33 @@ export function CartPanel({
         )}
       </div>
 
-      <div className="flex flex-col gap-3 border-t border-border pt-4">
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">Subtotal (incl. tax)</span>
+      {/* Bill Footer Summary */}
+      <div className="flex flex-col gap-2.5 rounded-xl border border-border/80 bg-secondary/30 p-3.5 shadow-xs">
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <span>Items in ticket</span>
           <span className="font-semibold tabular-nums text-foreground">
+            {totalItemCount} {totalItemCount === 1 ? "item" : "items"}
+          </span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold text-foreground">
+            Total (incl. tax)
+          </span>
+          <span className="text-base font-bold tabular-nums text-foreground tracking-tight">
             {formatCurrency(subtotal)}
           </span>
         </div>
-        <Button className="h-11" disabled={!canSubmit} onClick={onSubmit}>
+
+        <Button
+          className="h-11 w-full text-xs font-bold uppercase tracking-wide shadow-md shadow-primary/20 transition-all hover:shadow-lg hover:shadow-primary/30 active:scale-[0.99]"
+          disabled={!canSubmit}
+          onClick={onSubmit}
+        >
           {isSubmitting
-            ? "Sending to kitchen…"
+            ? "Sending Order…"
             : existingOrderNumber
-              ? "Add to order & send to kitchen"
-              : "Send to kitchen"}
+              ? `Add to #${existingOrderNumber} & Send`
+              : "Send to Kitchen"}
         </Button>
       </div>
     </div>

@@ -20,35 +20,38 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+export type NavSection = "SERVICE" | "OPERATIONS" | "ADMINISTRATION";
+
 export interface NavItem {
   labelKey: string;
   href: string;
   icon: LucideIcon;
   permission?: string;
+  section: NavSection;
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  { labelKey: "nav.dashboard", href: "/dashboard", icon: LayoutDashboard, permission: "dashboard.sales.view" },
-  { labelKey: "nav.pos", href: "/pos", icon: ShoppingCart, permission: "orders.create" },
-  { labelKey: "nav.orders", href: "/orders", icon: ClipboardList, permission: "orders.create" },
-  { labelKey: "nav.tables", href: "/tables", icon: LayoutGrid, permission: "tables.view" },
-  {
-    labelKey: "nav.reservations",
-    href: "/reservations",
-    icon: CalendarClock,
-    permission: "reservations.manage",
-  },
-  { labelKey: "nav.menu", href: "/menu", icon: UtensilsCrossed, permission: "menu.view" },
-  { labelKey: "nav.kds", href: "/kds", icon: ChefHat, permission: "kds.manage" },
-  { labelKey: "nav.customers", href: "/customers", icon: UsersRound, permission: "customers.manage" },
-  { labelKey: "nav.inventory", href: "/inventory", icon: Package, permission: "inventory.manage" },
-  { labelKey: "nav.myDeliveries", href: "/my-deliveries", icon: Bike, permission: "delivery.rider" },
-  { labelKey: "nav.delivery", href: "/delivery", icon: Truck, permission: "delivery.manage" },
-  { labelKey: "nav.team", href: "/team", icon: Users, permission: "staff.manage" },
-  { labelKey: "nav.accounting", href: "/accounting", icon: Landmark, permission: "accounting.manage" },
-  { labelKey: "nav.reports", href: "/reports", icon: BarChart3, permission: "reports.access" },
-  { labelKey: "nav.marketing", href: "/marketing", icon: Megaphone, permission: "marketing.manage" },
-  { labelKey: "nav.operations", href: "/operations", icon: Wrench, permission: "operations.manage" },
-  { labelKey: "nav.attendance", href: "/attendance", icon: Clock },
-  { labelKey: "nav.settings", href: "/settings", icon: Settings, permission: "settings.manage" },
+  // Service & Floor
+  { labelKey: "nav.dashboard", href: "/dashboard", icon: LayoutDashboard, permission: "dashboard.sales.view", section: "SERVICE" },
+  { labelKey: "nav.pos", href: "/pos", icon: ShoppingCart, permission: "orders.create", section: "SERVICE" },
+  { labelKey: "nav.orders", href: "/orders", icon: ClipboardList, permission: "orders.create", section: "SERVICE" },
+  { labelKey: "nav.tables", href: "/tables", icon: LayoutGrid, permission: "tables.view", section: "SERVICE" },
+  { labelKey: "nav.reservations", href: "/reservations", icon: CalendarClock, permission: "reservations.manage", section: "SERVICE" },
+  { labelKey: "nav.kds", href: "/kds", icon: ChefHat, permission: "kds.manage", section: "SERVICE" },
+
+  // Catalog & Inventory
+  { labelKey: "nav.menu", href: "/menu", icon: UtensilsCrossed, permission: "menu.view", section: "OPERATIONS" },
+  { labelKey: "nav.inventory", href: "/inventory", icon: Package, permission: "inventory.manage", section: "OPERATIONS" },
+  { labelKey: "nav.customers", href: "/customers", icon: UsersRound, permission: "customers.manage", section: "OPERATIONS" },
+  { labelKey: "nav.delivery", href: "/delivery", icon: Truck, permission: "delivery.manage", section: "OPERATIONS" },
+  { labelKey: "nav.myDeliveries", href: "/my-deliveries", icon: Bike, permission: "delivery.rider", section: "OPERATIONS" },
+
+  // Team & Administration
+  { labelKey: "nav.team", href: "/team", icon: Users, permission: "staff.manage", section: "ADMINISTRATION" },
+  { labelKey: "nav.attendance", href: "/attendance", icon: Clock, section: "ADMINISTRATION" },
+  { labelKey: "nav.accounting", href: "/accounting", icon: Landmark, permission: "accounting.manage", section: "ADMINISTRATION" },
+  { labelKey: "nav.reports", href: "/reports", icon: BarChart3, permission: "reports.access", section: "ADMINISTRATION" },
+  { labelKey: "nav.marketing", href: "/marketing", icon: Megaphone, permission: "marketing.manage", section: "ADMINISTRATION" },
+  { labelKey: "nav.operations", href: "/operations", icon: Wrench, permission: "operations.manage", section: "ADMINISTRATION" },
+  { labelKey: "nav.settings", href: "/settings", icon: Settings, permission: "settings.manage", section: "ADMINISTRATION" },
 ];

@@ -48,24 +48,24 @@ function StatCard({
       aria-label={`${label}: ${value}. Open details`}
       className="group block rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
     >
-    <Card className="flex h-full flex-col gap-3 p-6 transition group-hover:border-primary/40 group-hover:shadow-md">
-      <div className="flex items-center justify-between">
-        <span className="text-[13px] font-medium text-muted-foreground">{label}</span>
-        <div
-          className={cn(
-            "flex h-9 w-9 items-center justify-center rounded-xl",
-            accent === "success" && "bg-success/10 text-success",
-            accent === "warning" && "bg-warning/10 text-warning",
-            !accent && "bg-primary/10 text-primary",
-          )}
-        >
-          <Icon className="h-[18px] w-[18px]" />
+      <Card className="relative overflow-hidden flex h-full flex-col gap-3 p-5 sm:p-6 transition-all duration-200 border-border/80 bg-card/95 hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5">
+        <div className="flex items-center justify-between">
+          <span className="text-[13px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">{label}</span>
+          <div
+            className={cn(
+              "flex h-9 w-9 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-110",
+              accent === "success" && "bg-success/15 text-success ring-1 ring-success/20",
+              accent === "warning" && "bg-warning/15 text-warning ring-1 ring-warning/20",
+              !accent && "bg-primary/10 text-primary ring-1 ring-primary/20",
+            )}
+          >
+            <Icon className="h-[18px] w-[18px]" />
+          </div>
         </div>
-      </div>
-      <span className="text-3xl font-semibold tabular-nums tracking-tight text-foreground">
-        {value}
-      </span>
-    </Card>
+        <span className="text-3xl font-bold tabular-nums tracking-tight text-foreground">
+          {value}
+        </span>
+      </Card>
     </Link>
   );
 }
@@ -123,20 +123,36 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-border/50">
         <div>
-          <h1 className="text-[32px] font-semibold tracking-tight text-foreground">Dashboard</h1>
-          <p className="text-sm text-muted-foreground">Real-time overview of today&apos;s service</p>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-[28px] font-bold tracking-tight text-foreground">Live Dashboard</h1>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Service Active
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground mt-0.5">Real-time floor, billing, and kitchen metrics</p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          aria-expanded={customizing}
-          onClick={() => setCustomizing((v) => !v)}
-        >
-          <SlidersHorizontal className="h-3.5 w-3.5" />
-          Customize
-        </Button>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/pos"
+            className="hidden sm:inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-sm hover:opacity-90 transition active:scale-95"
+          >
+            <Store className="h-3.5 w-3.5" />
+            Launch POS Till
+          </Link>
+          <Button
+            variant="outline"
+            size="sm"
+            aria-expanded={customizing}
+            onClick={() => setCustomizing((v) => !v)}
+            className="text-xs font-medium"
+          >
+            <SlidersHorizontal className="h-3.5 w-3.5" />
+            Customize View
+          </Button>
+        </div>
       </div>
 
       {customizing && (
@@ -422,3 +438,4 @@ function PendingOrdersBanner({ branchId }: { branchId: string | null }) {
     </Card>
   );
 }
+

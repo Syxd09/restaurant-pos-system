@@ -42,7 +42,7 @@ const FILTERS: { key: string; label: string; channel?: OrderChannel; type?: stri
 
 const chip = (on: boolean) =>
   cn(
-    "rounded-full border px-3.5 py-1.5 text-sm transition-colors",
+    "rounded-md border px-3 py-1 text-xs font-medium transition-all shadow-2xs",
     on
       ? "border-primary bg-primary text-primary-foreground"
       : "border-border text-muted-foreground hover:bg-secondary",
@@ -114,7 +114,7 @@ function OrdersView() {
             }} className={chip(tab === t.key)}>
             {t.label}
             {t.key === "pending" && pendingCount > 0 && (
-              <span className="ml-2 rounded-full bg-destructive px-1.5 text-xs text-white">
+              <span className="ml-1.5 rounded-xs bg-destructive px-1.5 py-0.2 text-[10px] font-bold text-white">
                 {pendingCount}
               </span>
             )}
@@ -181,7 +181,7 @@ function OrdersView() {
       >
         <div
           className={cn(
-            "flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-2.5 shadow-[0_12px_32px_rgba(23,21,34,0.14)]",
+            "flex items-center gap-3 rounded-md border border-border bg-card px-4 py-2.5 shadow-lg",
             visibleSelected.length > 0 && "pointer-events-auto",
           )}
         >
@@ -286,7 +286,7 @@ function OrderRow({
 
 export default function OrdersPage() {
   return (
-    <Suspense fallback={<Skeleton className="h-96 rounded-2xl" />}>
+    <Suspense fallback={<Skeleton className="h-96 rounded-md" />}>
       <OrdersView />
     </Suspense>
   );

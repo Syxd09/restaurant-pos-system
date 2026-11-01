@@ -99,7 +99,7 @@ export function MenuScreen({
                   setCategoryId(c.id);
                 }}
                 className={cn(
-                  "shrink-0 touch-manipulation select-none rounded-2xl px-4 text-left text-[1.2rem] font-semibold leading-tight",
+                  "shrink-0 touch-manipulation select-none rounded-md px-4 text-left text-[1.2rem] font-semibold leading-tight",
                   "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/40",
                   "py-3",
                   on ? "bg-primary text-primary-foreground" : "bg-secondary text-foreground hover:bg-muted",
@@ -125,7 +125,7 @@ export function MenuScreen({
                 onChange={(e) => setQuery(e.target.value.slice(0, 40))}
                 placeholder={t("kiosk.menu.search")}
                 className={cn(
-                  "w-full select-text rounded-2xl border-2 border-border bg-card pl-12 pr-14 text-[1.15rem] focus-visible:border-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30",
+                  "w-full select-text rounded-md border-2 border-border bg-card pl-12 pr-14 text-[1.15rem] focus-visible:border-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/30",
                   "py-3",
                 )}
               />
@@ -152,7 +152,7 @@ export function MenuScreen({
                 {visible.map((item) => {
                   const qty = qtyOf(item.id);
                   return (
-                    <li key={item.id} className="flex flex-col overflow-hidden rounded-2xl border-2 border-border bg-card">
+                    <li key={item.id} className="flex flex-col overflow-hidden rounded-md border-2 border-border bg-card">
                       {item.imageUrl && (
                         <UploadImage src={item.imageUrl} width={320} height={128} sizes="(max-width: 768px) 50vw, 320px" className="h-32 w-full object-cover" />
                       )}

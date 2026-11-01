@@ -46,14 +46,14 @@ function StatCard({
     <Link
       href={href}
       aria-label={`${label}: ${value}. Open details`}
-      className="group block rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+      className="group block rounded-md outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
     >
-      <Card className="relative overflow-hidden flex h-full flex-col gap-3 p-5 sm:p-6 transition-all duration-200 border-border/80 bg-card/95 hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5">
+      <Card className="relative overflow-hidden flex h-full flex-col gap-3 p-5 sm:p-6 transition-all duration-200 border border-border/80 bg-card hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5 rounded-md">
         <div className="flex items-center justify-between">
           <span className="text-[13px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">{label}</span>
           <div
             className={cn(
-              "flex h-9 w-9 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-110",
+              "flex h-9 w-9 items-center justify-center rounded-sm transition-transform duration-200 group-hover:scale-105",
               accent === "success" && "bg-success/15 text-success ring-1 ring-success/20",
               accent === "warning" && "bg-warning/15 text-warning ring-1 ring-warning/20",
               !accent && "bg-primary/10 text-primary ring-1 ring-primary/20",
@@ -127,7 +127,7 @@ export default function DashboardPage() {
         <div>
           <div className="flex items-center gap-2.5">
             <h1 className="text-[28px] font-bold tracking-tight text-foreground">Live Dashboard</h1>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+            <span className="inline-flex items-center gap-1.5 rounded-sm bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
               Service Active
             </span>
@@ -181,7 +181,7 @@ export default function DashboardPage() {
       {isLoading || !data ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-[104px] rounded-2xl" />
+            <Skeleton key={i} className="h-[104px] rounded-md" />
           ))}
         </div>
       ) : (
@@ -321,14 +321,16 @@ export default function DashboardPage() {
             {data?.recentOrders.map((order) => {
               const isOnline = ONLINE_ORDER_TYPES.has(order.type);
               return (
-                <button
+                <div
                   key={order.id}
-                  type="button"
-                  onClick={() => setViewingOrderId(order.id)}
-                  className="flex items-center justify-between py-2.5 text-left text-sm transition hover:opacity-80"
-                  title="View order details"
+                  className="flex items-center justify-between py-2 px-1 text-sm transition-colors hover:bg-secondary/40 rounded-md"
                 >
-                  <div className="flex flex-col">
+                  <button
+                    type="button"
+                    onClick={() => setViewingOrderId(order.id)}
+                    className="flex flex-1 flex-col text-left cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-xs"
+                    title="View order details"
+                  >
                     <span className="font-medium text-foreground">#{order.orderNumber}</span>
                     <Badge
                       variant="secondary"
@@ -339,8 +341,8 @@ export default function DashboardPage() {
                     >
                       {order.type.replace("_", " ")}
                     </Badge>
-                  </div>
-                  <div className="flex items-center gap-1">
+                  </button>
+                  <div className="flex items-center gap-2">
                     <span className="font-medium tabular-nums text-foreground">
                       {formatCurrency(order.totalAmount)}
                     </span>
@@ -351,7 +353,7 @@ export default function DashboardPage() {
                       maxAmount={Number(order.totalAmount)}
                     />
                   </div>
-                </button>
+                </div>
               );
             })}
           </div>
@@ -438,4 +440,5 @@ function PendingOrdersBanner({ branchId }: { branchId: string | null }) {
     </Card>
   );
 }
+
 

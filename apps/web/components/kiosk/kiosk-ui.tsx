@@ -38,7 +38,7 @@ export function KButton({
       disabled={props.disabled || loading}
       aria-busy={loading || undefined}
       className={cn(
-        "inline-flex touch-manipulation select-none items-center justify-center gap-2 rounded-2xl px-5 font-semibold transition-colors",
+        "inline-flex touch-manipulation select-none items-center justify-center gap-2 rounded-md px-5 font-semibold transition-colors",
         "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/40",
         "disabled:pointer-events-none disabled:opacity-60 active:scale-[0.98] motion-reduce:transition-none",
         TOUCH,
@@ -97,7 +97,7 @@ export function Banner({
   return (
     <div
       role={tone === "error" ? "alert" : "status"}
-      className={cn("flex items-center gap-4 rounded-2xl border-2 p-4", toneClass)}
+      className={cn("flex items-center gap-4 rounded-md border-2 p-4", toneClass)}
     >
       <div className="min-w-0 flex-1">
         <p className="text-[1.15rem] font-semibold leading-snug">{title}</p>

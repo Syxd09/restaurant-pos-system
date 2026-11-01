@@ -23,7 +23,7 @@
   "order.qrNotRecognized": "This QR code isn't recognized",
   "order.askStaffForHelp": "Please ask a staff member for help.",
   "order.thankYouName": "Thank you, {name}!",
-  "order.thanksMessage": "{branch} says thanks for your order 🎉",
+  "order.thanksMessage": "{branch} appreciates your order.",
   "order.theKitchen": "The kitchen",
   "order.orderNumberSent": "Order #{number} · sent to the kitchen",
   "order.orderMore": "Order more",

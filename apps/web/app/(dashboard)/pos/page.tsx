@@ -344,7 +344,7 @@ function PosPageInner() {
         <button
           type="button"
           onClick={() => setCartOpen(true)}
-          className="fixed inset-x-3 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-30 flex h-14 items-center justify-between rounded-2xl bg-primary px-4 text-primary-foreground shadow-lg active:scale-[0.98] lg:hidden"
+          className="fixed inset-x-3 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-30 flex h-14 items-center justify-between rounded-md bg-primary px-4 text-primary-foreground shadow-lg active:scale-[0.98] lg:hidden"
           style={{ backgroundImage: "var(--gradient-primary)" }}
         >
           <span className="flex items-center gap-2 text-sm font-semibold">

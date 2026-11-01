@@ -15,7 +15,7 @@ const REASON: Record<string, string> = {
 
 export function RewardsCard({ branchId, customerId }: { branchId: string | null; customerId: string }) {
   const { data, isLoading, isError } = useCustomerRewards(branchId, customerId);
-  if (isLoading) return <Skeleton className="h-40 rounded-2xl" />;
+  if (isLoading) return <Skeleton className="h-40 rounded-md" />;
   if (isError || !data) return null;
   return (
     <Card className="flex flex-col gap-3 p-5">

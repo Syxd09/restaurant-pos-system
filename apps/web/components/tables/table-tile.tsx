@@ -58,7 +58,7 @@ export function TableTile({
         <DropdownMenuTrigger
           style={style}
           className={cn(
-            "absolute flex flex-col items-center justify-center gap-1 rounded-2xl border-2 text-xs font-medium shadow-sm transition-transform hover:scale-[1.03]",
+            "absolute flex flex-col items-center justify-center gap-1 rounded-md border text-xs font-medium shadow-xs transition-all hover:scale-[1.02] hover:shadow-md",
             STATUS_STYLES[table.status],
           )}
         >

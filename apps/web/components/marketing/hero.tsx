@@ -3,7 +3,8 @@
 import { ArrowRight, Github } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { downloadHref } from "@/lib/downloads";
 import { PosMockup } from "@/components/marketing/pos-mockup";
 
@@ -61,19 +62,20 @@ export function Hero() {
           transition={{ duration: 0.4, delay: 0.48, ease: [0.22, 1, 0.36, 1] }}
           className="mt-9 flex flex-col items-center gap-3 sm:flex-row"
         >
-          <Button size="lg" className="h-11 px-6 text-[15px]" render={<Link href="/signup" />}>
+          <Link
+            href="/signup"
+            className={cn(buttonVariants({ size: "lg" }), "h-11 px-6 text-[15px] font-medium rounded-md")}
+          >
             Get started free
             <ArrowRight className="size-4" data-icon="inline-end" />
-          </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            className="h-11 px-6 text-[15px]"
-            render={<a href={downloadHref("github")} />}
+          </Link>
+          <a
+            href={downloadHref("github")}
+            className={cn(buttonVariants({ variant: "outline", size: "lg" }), "h-11 px-6 text-[15px] font-medium rounded-md")}
           >
             <Github className="size-4" data-icon="inline-start" />
             View on GitHub
-          </Button>
+          </a>
         </motion.div>
       </div>
 

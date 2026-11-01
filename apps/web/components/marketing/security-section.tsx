@@ -47,7 +47,7 @@ export function SecuritySection() {
           {points.map((p) => (
             <RevealItem
               key={p.title}
-              className="flex gap-4 rounded-2xl border border-border/60 bg-card p-6"
+              className="flex gap-4 rounded-md border border-border/60 bg-card p-6"
             >
               <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <p.icon className="size-5" />

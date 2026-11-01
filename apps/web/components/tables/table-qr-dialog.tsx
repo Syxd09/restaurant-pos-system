@@ -35,7 +35,7 @@ export function TableQrDialog({
         <div className="flex flex-col items-center gap-4 py-2">
           {orderUrl ? (
             <>
-              <div className="rounded-2xl border border-border bg-white p-4">
+              <div className="rounded-md border border-border bg-white p-4">
                 <QRCodeSVG value={orderUrl} size={200} />
               </div>
               <p className="max-w-xs text-center text-xs text-muted-foreground break-all">

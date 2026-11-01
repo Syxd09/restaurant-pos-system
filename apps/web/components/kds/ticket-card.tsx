@@ -128,7 +128,7 @@ export function TicketCard({ ticket, branchId }: { ticket: KotTicket; branchId: 
         </div>
         <div
           className={cn(
-            "flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium tabular-nums",
+            "flex items-center gap-1 rounded-xs border border-border/60 px-1.5 py-0.5 text-xs font-mono font-medium tabular-nums",
             isLate ? "bg-warning/15 text-warning" : "bg-secondary text-muted-foreground",
           )}
         >

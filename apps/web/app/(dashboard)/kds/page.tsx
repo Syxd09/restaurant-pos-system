@@ -64,7 +64,7 @@ export default function KdsPage() {
               aria-pressed={s.id === activeStation}
               onClick={() => pref.choose(s.id)}
               className={cn(
-                "min-h-11 rounded-full border px-4 text-sm font-medium transition-colors",
+                "min-h-8 rounded-md border px-3 py-1.5 text-xs font-semibold transition-all shadow-2xs",
                 s.id === activeStation
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-border text-muted-foreground hover:bg-secondary",
@@ -93,7 +93,7 @@ export default function KdsPage() {
         <section aria-label="Incoming orders" className="flex flex-col gap-2">
           <h2 className="text-sm font-semibold text-foreground">
             Incoming - needs a decision{" "}
-            <span className="ml-1 rounded-full bg-destructive px-2 py-0.5 text-xs text-white">{pendingOrders.length}</span>
+            <span className="ml-1.5 rounded-xs bg-destructive px-1.5 py-0.2 text-[10px] font-bold text-white">{pendingOrders.length}</span>
           </h2>
           <div className="flex gap-3 overflow-x-auto pb-2">
             {pendingOrders.map((order) => (
@@ -120,7 +120,7 @@ export default function KdsPage() {
       ) : (
         <div className="flex min-h-0 flex-1 snap-x snap-mandatory gap-3 overflow-x-auto sm:grid sm:snap-none sm:grid-cols-2 sm:gap-4 sm:overflow-hidden xl:grid-cols-4">
           {COLUMNS.map((col) => (
-            <div key={col.status} className="flex w-[85%] shrink-0 snap-center flex-col gap-3 overflow-hidden rounded-2xl bg-secondary/40 p-3 sm:w-auto sm:shrink">
+            <div key={col.status} className="flex w-[85%] shrink-0 snap-center flex-col gap-3 overflow-hidden rounded-md border border-border/60 bg-secondary/30 p-3 sm:w-auto sm:shrink">
               <div className="flex items-center justify-between px-1">
                 <h2 className="text-sm font-semibold text-foreground">{col.label}</h2>
                 <span className="text-xs font-medium text-muted-foreground">
@@ -130,7 +130,7 @@ export default function KdsPage() {
               <div className="flex flex-1 flex-col gap-3 overflow-y-auto pb-2">
                 {(tickets.isLoading || !canFetch) &&
                   Array.from({ length: 2 }).map((_, i) => (
-                    <Skeleton key={i} className="h-32 rounded-2xl" />
+                    <Skeleton key={i} className="h-32 rounded-md" />
                   ))}
                 {byStatus(col.status).map((ticket) => (
                   <TicketCard key={ticket.id} ticket={ticket} branchId={branchId} />

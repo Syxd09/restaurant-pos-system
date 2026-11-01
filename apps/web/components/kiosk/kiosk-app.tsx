@@ -285,7 +285,7 @@ export function KioskApp({ token }: { token: string }) {
 function Overlay({ children }: { children: React.ReactNode }) {
   return (
     <div role="alertdialog" aria-modal="true" className="absolute inset-0 z-40 flex items-center justify-center bg-black/60 p-6">
-      <div className="flex w-full max-w-[40rem] flex-col gap-5 rounded-3xl bg-card p-8 text-center shadow-2xl">
+      <div className="flex w-full max-w-[40rem] flex-col gap-5 rounded-lg bg-card p-8 text-center shadow-2xl">
         {children}
       </div>
     </div>

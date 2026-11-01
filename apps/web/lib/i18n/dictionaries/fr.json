@@ -23,7 +23,7 @@
   "order.qrNotRecognized": "Ce code QR n'est pas reconnu",
   "order.askStaffForHelp": "Merci de demander de l'aide à un membre du personnel.",
   "order.thankYouName": "Merci, {name} !",
-  "order.thanksMessage": "{branch} vous remercie pour votre commande 🎉",
+  "order.thanksMessage": "{branch} vous remercie de votre commande.",
   "order.theKitchen": "La cuisine",
   "order.orderNumberSent": "Commande #{number} · envoyée en cuisine",
   "order.orderMore": "Commander plus",

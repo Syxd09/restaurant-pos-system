@@ -104,7 +104,7 @@ export default function TablesPage() {
       </div>
 
       {isLoading ? (
-        <Skeleton className="h-96 rounded-2xl" />
+        <Skeleton className="h-96 rounded-md" />
       ) : floorsQuery.isError && !floors ? (
         <QueryError
           error={floorsQuery.error}

@@ -8,7 +8,7 @@ import { downloadHref, totalDownloads } from "@/lib/downloads";
 import { useDownloadStats } from "@/hooks/use-download-stats";
 
 const INSTALL_COMMAND =
-  "git clone https://github.com/Raktim94/nodedr-restaurant-pos.git && cd nodedr-restaurant-pos && ./install.sh";
+  "git clone https://github.com/Syxd09/restaurant-pos-system.git && cd restaurant-pos-system && ./install.sh";
 
 const channels = [
   {
@@ -81,9 +81,9 @@ export function InstallSection() {
           <RevealItem key={c.channel}>
             <a
               href={downloadHref(c.channel)}
-              className="group flex h-full flex-col rounded-2xl border border-border/60 bg-card p-6 transition-colors hover:border-primary/40"
+              className="group flex h-full flex-col rounded-lg border border-border/60 bg-card p-6 transition-colors hover:border-primary/40"
             >
-              <div className="inline-flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <div className="inline-flex size-10 items-center justify-center rounded-md bg-primary/10 text-primary">
                 <c.icon className="size-5" />
               </div>
               <h3 className="mt-4 text-[15px] font-semibold text-foreground">{c.title}</h3>

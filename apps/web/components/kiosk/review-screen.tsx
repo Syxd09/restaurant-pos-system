@@ -52,7 +52,7 @@ export function ReviewScreen({
     <div className="flex h-full flex-col">
       {header}
       <div className="flex min-h-0 flex-1 flex-col gap-4 p-4 lg:flex-row lg:gap-6 lg:p-6">
-        <section className="flex min-h-0 flex-1 flex-col rounded-3xl border-2 border-border bg-card">
+        <section className="flex min-h-0 flex-1 flex-col rounded-lg border-2 border-border bg-card">
           <h1 className="flex items-center justify-between gap-3 border-b border-border p-5 text-[1.9rem] font-bold">
             {t("kiosk.review.title")}
             <span className="rounded-full bg-secondary px-4 py-1 text-[1.1rem] font-semibold">{serviceLabel}</span>
@@ -62,7 +62,7 @@ export function ReviewScreen({
           </div>
         </section>
 
-        <section className="flex shrink-0 flex-col justify-between gap-4 rounded-3xl border-2 border-border bg-card p-5 lg:w-[26rem]">
+        <section className="flex shrink-0 flex-col justify-between gap-4 rounded-lg border-2 border-border bg-card p-5 lg:w-[26rem]">
           <div className="space-y-2">
             <div className="flex items-baseline justify-between text-[2rem] font-bold">
               <span>{t("kiosk.basket.total")}</span>

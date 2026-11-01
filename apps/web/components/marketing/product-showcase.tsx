@@ -58,7 +58,7 @@ export function ProductShowcase() {
       </Reveal>
 
       <Reveal delay={0.16} className="relative mt-8">
-        <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-[0_20px_70px_-20px_rgba(0,0,0,0.35)]">
+        <div className="overflow-hidden rounded-md border border-border/60 bg-card shadow-[0_20px_70px_-20px_rgba(0,0,0,0.35)]">
           <div className="flex items-center gap-1.5 border-b border-border/60 bg-muted/40 px-4 py-2.5">
             <span className="size-2.5 rounded-full bg-destructive/50" />
             <span className="size-2.5 rounded-full bg-warning/50" />

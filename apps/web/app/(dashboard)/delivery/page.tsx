@@ -67,7 +67,7 @@ function DeliveryCard({ order, branchId }: { order: DeliveryOrder; branchId: str
             </a>
           )}
         </div>
-        <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-foreground">
+        <span className="rounded-sm border border-border/60 bg-secondary px-2 py-0.5 text-[11px] font-semibold text-foreground">
           {STATUS_LABEL[status]}
         </span>
       </div>
@@ -213,7 +213,7 @@ function RidersPanel({ branchId }: { branchId: string | null }) {
       </h2>
       <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {drivers.map((d) => (
-          <li key={d.id} className="flex items-center justify-between gap-3 rounded-xl border border-border p-3 text-sm">
+          <li key={d.id} className="flex items-center justify-between gap-3 rounded-md border border-border/80 bg-card p-3 text-sm shadow-2xs">
             <div className="min-w-0">
               <p className="truncate font-medium text-foreground">
                 <span className={d.riderOnline ? "text-success" : "text-muted-foreground"} aria-hidden>
@@ -262,7 +262,7 @@ export default function DeliveryPage() {
             type="button"
             onClick={() => setTab(t)}
             className={cn(
-              "rounded-full border px-3.5 py-1 text-xs capitalize transition-colors",
+              "rounded-md border px-3 py-1 text-xs font-medium capitalize transition-all shadow-2xs",
               tab === t ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted-foreground hover:bg-secondary",
             )}
           >

@@ -514,7 +514,7 @@ export function CheckoutPanel({
                   key={v}
                   type="button"
                   onClick={() => setDiscountValue(String(v))}
-                  className="min-h-8 rounded-full border border-border px-2.5 text-xs text-muted-foreground transition-colors hover:bg-secondary"
+                  className="min-h-7 rounded-sm border border-border/80 bg-card px-2.5 text-xs font-medium text-foreground transition-all hover:bg-secondary hover:border-border shadow-2xs"
                 >
                   {discountMode === "PERCENT" ? `${v}%` : `₹${v}`}
                 </button>

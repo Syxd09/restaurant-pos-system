@@ -127,7 +127,7 @@ function HappyHour({ branchId }: { branchId: string | null }) {
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
           {DAY_NAMES.map((n, d) => (
-            <button key={n} type="button" onClick={() => toggleDay(d)} className={cn("rounded-full border px-3 py-1 text-xs", f.days.includes(d) ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted-foreground")}>
+            <button key={n} type="button" onClick={() => toggleDay(d)} className={cn("rounded-md border px-2.5 py-1 text-xs font-medium transition-all", f.days.includes(d) ? "border-primary bg-primary text-primary-foreground font-semibold" : "border-border/80 text-muted-foreground hover:bg-secondary")}>
               {n}
             </button>
           ))}
@@ -273,7 +273,7 @@ export default function MarketingPage() {
       </div>
       <div className="flex gap-2">
         {TABS.map((t) => (
-          <button key={t} type="button" onClick={() => setTab(t)} className={cn("rounded-full border px-3.5 py-1 text-xs capitalize transition-colors", tab === t ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted-foreground hover:bg-secondary")}>
+          <button key={t} type="button" onClick={() => setTab(t)} className={cn("rounded-md border px-3 py-1 text-xs font-medium capitalize transition-all shadow-2xs", tab === t ? "border-primary bg-primary text-primary-foreground font-semibold" : "border-border/80 bg-card text-muted-foreground hover:bg-secondary")}>
             {t}
           </button>
         ))}

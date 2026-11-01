@@ -186,8 +186,8 @@ export default function MyDeliveriesPage() {
   if (me.isLoading || !me.data) {
     return (
       <div className="flex flex-col gap-4">
-        <Skeleton className="h-20 rounded-2xl" />
-        <Skeleton className="h-40 rounded-2xl" />
+        <Skeleton className="h-20 rounded-md" />
+        <Skeleton className="h-40 rounded-md" />
       </div>
     );
   }
@@ -205,7 +205,7 @@ export default function MyDeliveriesPage() {
         </p>
       </div>
 
-      <div className={`flex items-center justify-between rounded-2xl px-4 py-3 ${online ? "bg-success/15" : "bg-secondary"}`}>
+      <div className={`flex items-center justify-between rounded-md px-4 py-3 ${online ? "bg-success/15" : "bg-secondary"}`}>
         <div>
           <p className="text-sm font-semibold text-foreground">{online ? "You are online" : "You are offline"}</p>
           <p className="text-xs text-muted-foreground" aria-live="polite">
@@ -250,9 +250,9 @@ export default function MyDeliveriesPage() {
           Your deliveries
         </h2>
         {deliveries.isLoading ? (
-          <Skeleton className="h-40 rounded-2xl" />
+          <Skeleton className="h-40 rounded-md" />
         ) : active.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-border px-4 py-10 text-center">
+          <div className="flex flex-col items-center gap-2 rounded-md border border-dashed border-border px-4 py-10 text-center">
             <Bike className="h-8 w-8 text-muted-foreground" aria-hidden />
             <p className="text-sm font-medium text-foreground">{online ? "Waiting for your next delivery" : "No deliveries right now"}</p>
             <p className="text-xs text-muted-foreground">

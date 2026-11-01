@@ -33,7 +33,7 @@ export default function PurchaseOrderDetailPage({ params }: { params: Promise<{ 
   const updateStatus = useUpdatePurchaseOrderStatus(branchId);
 
   if (isLoading || !po) {
-    return <Skeleton className="h-96 rounded-2xl" />;
+    return <Skeleton className="h-96 rounded-md" />;
   }
 
   const send = () =>

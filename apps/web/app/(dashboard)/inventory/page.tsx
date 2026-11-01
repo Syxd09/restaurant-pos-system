@@ -59,7 +59,7 @@ function InventoryView() {
       <InventoryTabs />
 
       {trackingStatus && trackingStatus.problems.length > 0 && (
-        <div role="alert" className="flex gap-3 rounded-xl border border-warning/40 bg-warning/10 p-4 text-sm">
+        <div role="alert" className="flex gap-3 rounded-md border border-warning/40 bg-warning/10 p-4 text-sm">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
           <div className="flex flex-col gap-1">
             <p className="font-medium text-foreground">
@@ -85,7 +85,7 @@ function InventoryView() {
           aria-pressed={lowOnly}
           onClick={() => setLowOnly((v) => !v)}
           className={
-            "rounded-full border px-3.5 py-1.5 text-sm transition-colors " +
+            "rounded-md border px-3 py-1.5 text-xs font-medium transition-all shadow-2xs " +
             (lowOnly
               ? "border-primary bg-primary text-primary-foreground"
               : "border-border text-muted-foreground hover:bg-secondary")
@@ -165,7 +165,7 @@ function InventoryView() {
 
 export default function InventoryPage() {
   return (
-    <Suspense fallback={<Skeleton className="h-96 rounded-2xl" />}>
+    <Suspense fallback={<Skeleton className="h-96 rounded-md" />}>
       <InventoryView />
     </Suspense>
   );

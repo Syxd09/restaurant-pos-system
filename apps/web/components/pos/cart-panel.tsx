@@ -156,7 +156,7 @@ export function CartPanel({
 
       {/* Delivery Form */}
       {orderType === "DELIVERY" && (
-        <div className="flex flex-col gap-2 rounded-xl border border-border/70 bg-secondary/30 p-3">
+        <div className="flex flex-col gap-2 rounded-md border border-border/70 bg-secondary/30 p-3">
           <Input
             placeholder="Street address / landmark"
             value={delivery.address}
@@ -211,7 +211,7 @@ export function CartPanel({
       {checkingTable && (
         <p
           role="status"
-          className="rounded-xl bg-secondary/60 px-3 py-2 text-xs text-muted-foreground animate-pulse"
+          className="rounded-md bg-secondary/60 px-3 py-2 text-xs text-muted-foreground animate-pulse"
         >
           Checking active bills on this table…
         </p>
@@ -219,7 +219,7 @@ export function CartPanel({
 
       {openBills && openBills.length > 1 && (
         <div
-          className="flex flex-wrap items-center gap-1.5 rounded-xl bg-secondary/40 p-2 text-xs text-muted-foreground"
+          className="flex flex-wrap items-center gap-1.5 rounded-md bg-secondary/40 p-2 text-xs text-muted-foreground"
           role="group"
           aria-label="Open bills on this table"
         >
@@ -241,7 +241,7 @@ export function CartPanel({
       )}
 
       {existingOrderNumber && (
-        <div className="flex items-center justify-between gap-2 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-xs">
+        <div className="flex items-center justify-between gap-2 rounded-md border border-primary/20 bg-primary/5 px-3 py-2 text-xs">
           <span className="text-muted-foreground">
             Active bill:{" "}
             <span className="font-semibold text-foreground">
@@ -263,10 +263,10 @@ export function CartPanel({
       )}
 
       {/* Cart Items List */}
-      <div className="flex-1 overflow-y-auto rounded-xl border border-border/60 bg-background/50 p-2">
+      <div className="flex-1 overflow-y-auto rounded-md border border-border/60 bg-background/50 p-2">
         {lines.length === 0 ? (
           <div className="flex h-full min-h-[160px] flex-col items-center justify-center gap-2 text-center text-muted-foreground">
-            <div className="h-10 w-10 rounded-full bg-secondary/80 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-md bg-secondary/80 flex items-center justify-center">
               <ShoppingCart className="h-5 w-5 opacity-40" />
             </div>
             <div>
@@ -341,7 +341,7 @@ export function CartPanel({
       </div>
 
       {/* Bill Footer Summary */}
-      <div className="flex flex-col gap-2.5 rounded-xl border border-border/80 bg-secondary/30 p-3.5 shadow-xs">
+      <div className="flex flex-col gap-2.5 rounded-md border border-border/80 bg-secondary/30 p-3.5 shadow-xs">
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>Items in ticket</span>
           <span className="font-semibold tabular-nums text-foreground">

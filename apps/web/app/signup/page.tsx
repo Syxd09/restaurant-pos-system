@@ -6,7 +6,7 @@ import { motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { ArrowRight, Building2, ShieldCheck, Sparkles, UtensilsCrossed } from "lucide-react";
+import { ArrowRight, Building2, ShieldCheck, Store } from "lucide-react";
 import { StatusNote, useNoteToast } from "@/components/ui/status-note";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,54 +36,39 @@ export default function SignupPage() {
   };
 
   return (
-    <main className="relative flex min-h-screen flex-1 items-center justify-center overflow-hidden bg-background px-4 py-12">
-      {/* Background radial ambient lights */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-40 left-1/2 -z-10 h-[550px] w-[900px] -translate-x-1/2 bg-[radial-gradient(ellipse_at_top,color-mix(in_oklch,var(--primary),transparent_88%),transparent_65%)]"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute bottom-0 left-10 -z-10 h-72 w-72 rounded-full bg-primary/5 blur-3xl"
-      />
-
+    <main className="relative flex min-h-screen flex-1 items-center justify-center bg-background px-4 py-12">
       <motion.div
-        initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+        initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-[480px]"
+        transition={{ duration: 0.25 }}
+        className="w-full max-w-[440px]"
       >
         {/* Brand Header */}
-        <div className="mb-7 flex flex-col items-center gap-2 text-center">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/25 text-primary-foreground mb-1 ring-4 ring-primary/10">
-            <UtensilsCrossed className="h-6 w-6" />
+        <div className="mb-6 flex flex-col items-center gap-1.5 text-center">
+          <div className="flex h-10 w-10 items-center justify-center rounded-md border border-border/80 bg-card text-foreground shadow-2xs mb-2">
+            <Building2 className="h-5 w-5 text-primary" strokeWidth={2} />
           </div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              OrderRestro
-            </h1>
-            <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary border border-primary/20">
-              New Restaurant
-            </span>
-          </div>
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">
+            Register Restaurant
+          </h1>
           <p className="text-xs text-muted-foreground">
-            Configure your restaurant workspace and master owner account
+            Initialize an offline-first management console and owner account
           </p>
         </div>
 
         {/* Form Card */}
-        <div className="rounded-2xl border border-border/80 bg-card/95 p-7 shadow-xl shadow-foreground/5 backdrop-blur-md">
-          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+        <div className="rounded-lg border border-border/80 bg-card p-6 shadow-sm">
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="restaurantName" className="text-xs font-semibold text-foreground/90">
+                <Label htmlFor="restaurantName" className="text-xs font-medium text-foreground">
                   Restaurant Name
                 </Label>
                 <Input
                   id="restaurantName"
                   autoComplete="organization"
-                  placeholder="e.g. Bella Italia Bistro"
-                  className="h-10 text-xs transition-all focus-visible:ring-primary/25"
+                  placeholder="e.g. Bistro Central"
+                  className="h-9 rounded-md text-xs"
                   {...field("restaurantName")}
                 />
                 {errors.restaurantName && (
@@ -92,14 +77,14 @@ export default function SignupPage() {
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="branchName" className="text-xs font-semibold text-foreground/90">
-                  First Branch Name
+                <Label htmlFor="branchName" className="text-xs font-medium text-foreground">
+                  Initial Branch Name
                 </Label>
                 <Input
                   id="branchName"
-                  placeholder="Main Outlet"
+                  placeholder="Main Branch"
                   defaultValue="Main Branch"
-                  className="h-10 text-xs transition-all focus-visible:ring-primary/25"
+                  className="h-9 rounded-md text-xs"
                   {...field("branchName")}
                 />
                 {errors.branchName && (
@@ -109,14 +94,14 @@ export default function SignupPage() {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="ownerName" className="text-xs font-semibold text-foreground/90">
-                Owner Full Name
+              <Label htmlFor="ownerName" className="text-xs font-medium text-foreground">
+                Administrator Full Name
               </Label>
               <Input
                 id="ownerName"
                 autoComplete="name"
-                placeholder="e.g. Chef Marco Silva"
-                className="h-10 text-xs transition-all focus-visible:ring-primary/25"
+                placeholder="e.g. Alex Mercer"
+                className="h-9 rounded-md text-xs"
                 {...field("ownerName")}
               />
               {errors.ownerName && (
@@ -125,29 +110,29 @@ export default function SignupPage() {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="email" className="text-xs font-semibold text-foreground/90">
-                Master Login Email
+              <Label htmlFor="email" className="text-xs font-medium text-foreground">
+                Administrator Email
               </Label>
               <Input
                 id="email"
                 type="email"
                 autoComplete="email"
-                placeholder="owner@restaurant.com"
-                className="h-10 text-xs transition-all focus-visible:ring-primary/25"
+                placeholder="admin@restaurant.com"
+                className="h-9 rounded-md text-xs"
                 {...field("email")}
               />
               {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="password" className="text-xs font-semibold text-foreground/90">
-                Master Password
+              <Label htmlFor="password" className="text-xs font-medium text-foreground">
+                Password
               </Label>
               <PasswordInput
                 id="password"
                 autoComplete="new-password"
                 placeholder="At least 8 characters"
-                className="h-10 text-xs transition-all focus-visible:ring-primary/25"
+                className="h-9 rounded-md text-xs"
                 {...field("password")}
               />
               {errors.password && (
@@ -159,35 +144,23 @@ export default function SignupPage() {
 
             <Button
               type="submit"
-              className="mt-2 h-11 w-full font-medium shadow-md shadow-primary/20 transition-all hover:shadow-lg hover:shadow-primary/30 active:scale-[0.99]"
+              className="mt-1 h-9 rounded-md font-medium text-xs tracking-wide"
               disabled={register.isPending}
             >
-              {register.isPending ? (
-                <span className="flex items-center gap-2">
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
-                  Creating Workspace…
-                </span>
-              ) : (
-                <span className="flex items-center gap-1.5">
-                  Launch Restaurant Workspace
-                  <ArrowRight className="h-4 w-4" />
-                </span>
-              )}
+              {register.isPending ? "Creating Workspace…" : "Initialize Restaurant Console"}
             </Button>
           </form>
 
-          {/* Guarantee Badge */}
-          <div className="mt-5 flex items-center justify-center gap-1.5 text-center text-[11px] text-muted-foreground">
-            <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-            <span>100% Offline-First · Zero Cloud Lock-in · Self-Hosted</span>
+          <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-center gap-1.5 text-center text-[11px] text-muted-foreground">
+            <ShieldCheck className="h-3 w-3 text-muted-foreground" />
+            <span>Local Database Storage · 100% Self-Hosted</span>
           </div>
         </div>
 
-        {/* Footer */}
-        <p className="mt-6 text-center text-xs text-muted-foreground">
-          Already initialized your workspace?{" "}
+        <p className="mt-4 text-center text-xs text-muted-foreground">
+          Existing installation?{" "}
           <Link href="/login" className="font-medium text-foreground hover:underline transition-colors">
-            Sign in to existing terminal
+            Sign in to terminal
           </Link>
         </p>
       </motion.div>

@@ -362,7 +362,7 @@ function TeamView() {
             type="button"
             onClick={() => setTab(t)}
             className={cn(
-              "rounded-full border px-3.5 py-1 text-xs capitalize transition-colors",
+              "rounded-md border px-3 py-1 text-xs font-medium capitalize transition-all shadow-2xs",
               tab === t ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted-foreground hover:bg-secondary",
             )}
           >

@@ -26,7 +26,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
   const [isEditing, setIsEditing] = useState(false);
 
   if (isLoading || !customer) {
-    return <Skeleton className="h-96 rounded-2xl" />;
+    return <Skeleton className="h-96 rounded-md" />;
   }
 
   const onDelete = () => {

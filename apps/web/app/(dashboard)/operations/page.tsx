@@ -53,8 +53,8 @@ function EquipmentTab({ branchId }: { branchId: string | null }) {
               <div>
                 <p className="font-medium text-foreground">
                   {e.name}
-                  {e.overdue && <span className="ml-2 rounded-full bg-destructive/10 px-2 py-0.5 text-xs text-destructive">Overdue</span>}
-                  {e.dueSoon && <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">Due soon</span>}
+                  {e.overdue && <span className="ml-2 rounded-xs border border-destructive/20 bg-destructive/10 px-1.5 py-0.2 text-[10px] font-semibold text-destructive">Overdue</span>}
+                  {e.dueSoon && <span className="ml-2 rounded-xs border border-primary/20 bg-primary/10 px-1.5 py-0.2 text-[10px] font-semibold text-primary">Due soon</span>}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {e.location && `${e.location} · `}
@@ -155,7 +155,7 @@ export default function OperationsPage() {
       </div>
       <div className="flex gap-2">
         {(["equipment", "documents"] as const).map((t) => (
-          <button key={t} type="button" onClick={() => setTab(t)} className={cn("rounded-full border px-3.5 py-1 text-xs capitalize transition-colors", tab === t ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted-foreground hover:bg-secondary")}>
+          <button key={t} type="button" onClick={() => setTab(t)} className={cn("rounded-md border px-3 py-1 text-xs font-medium capitalize transition-all shadow-2xs", tab === t ? "border-primary bg-primary text-primary-foreground font-semibold" : "border-border/80 bg-card text-muted-foreground hover:bg-secondary")}>
             {t}
           </button>
         ))}

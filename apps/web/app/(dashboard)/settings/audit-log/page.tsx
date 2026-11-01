@@ -191,7 +191,7 @@ function EntityChip({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "inline-flex h-7 items-center rounded-full border px-3 text-xs font-medium transition-colors",
+        "inline-flex h-7 items-center rounded-md border px-2.5 text-xs font-medium transition-all shadow-2xs",
         active
           ? "border-primary bg-primary text-primary-foreground"
           : "border-border text-muted-foreground hover:text-foreground",

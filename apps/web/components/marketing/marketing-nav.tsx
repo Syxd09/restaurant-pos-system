@@ -4,7 +4,8 @@ import { Github, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { Logo } from "@/components/layout/logo";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { downloadHref } from "@/lib/downloads";
 
 const links = [
@@ -46,12 +47,8 @@ export function MarketingNav() {
             <Github className="size-4" />
             GitHub
           </a>
-          <Button variant="ghost" size="default" render={<Link href="/login" />}>
-            Sign in
-          </Button>
-          <Button variant="default" size="default" render={<Link href="/signup" />}>
-            Get started free
-          </Button>
+          <Link href="/login" className={cn(buttonVariants({ variant: "ghost", size: "default" }), "rounded-md")}>Sign in</Link>
+          <Link href="/signup" className={cn(buttonVariants({ variant: "default", size: "default" }), "rounded-md")}>Get started free</Link>
         </div>
 
         <button
@@ -79,12 +76,8 @@ export function MarketingNav() {
               </a>
             ))}
             <div className="mt-2 flex flex-col gap-2">
-              <Button variant="outline" render={<Link href="/login" />}>
-                Sign in
-              </Button>
-              <Button variant="default" render={<Link href="/signup" />}>
-                Get started free
-              </Button>
+              <Link href="/login" className={cn(buttonVariants({ variant: "outline" }), "w-full rounded-md")}>Sign in</Link>
+            <Link href="/signup" className={cn(buttonVariants({ variant: "default" }), "w-full rounded-md")}>Get started free</Link>
             </div>
           </nav>
         </div>

@@ -71,7 +71,7 @@ export default function CustomerDisplayPage() {
         <div className="m-auto flex flex-col items-center text-center">
           <p className="text-3xl text-muted-foreground">Scan to pay</p>
           <p className="mt-2 text-7xl font-semibold tabular-nums tracking-tight">{formatCurrency(state.total)}</p>
-          <div className="mt-8 rounded-3xl bg-white p-6 shadow-xl">
+          <div className="mt-8 rounded-lg bg-white p-6 shadow-xl">
             <QRCodeSVG value={state.uri} size={320} level="M" marginSize={1} />
           </div>
           <p className="mt-6 text-xl text-muted-foreground">

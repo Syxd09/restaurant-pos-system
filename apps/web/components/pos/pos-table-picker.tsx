@@ -58,7 +58,7 @@ export function PosTablePicker({
     return (
       <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5" aria-busy="true">
         {Array.from({ length: 10 }).map((_, i) => (
-          <Skeleton key={i} className="h-28 rounded-2xl" />
+          <Skeleton key={i} className="h-28 rounded-md" />
         ))}
       </div>
     );
@@ -97,7 +97,7 @@ export function PosTablePicker({
               title={STATUS_LABEL[table.status]}
               onClick={() => onSelect(table)}
               className={cn(
-                "flex h-28 flex-col items-center justify-center gap-1 rounded-2xl border-2 p-3 text-xs font-medium shadow-sm transition-transform lg:h-36 lg:gap-1.5",
+                "flex h-28 flex-col items-center justify-center gap-1 rounded-md border-2 p-3 text-xs font-medium shadow-sm transition-transform lg:h-36 lg:gap-1.5",
                 clickable && "cursor-pointer hover:scale-[1.03] hover:shadow-md",
                 !clickable && "cursor-not-allowed",
                 STATUS_STYLES[table.status],

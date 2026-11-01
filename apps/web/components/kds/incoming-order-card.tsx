@@ -49,7 +49,7 @@ export function IncomingOrderCard({ order, branchId }: { order: IncomingOrder; b
             {who && ` · ${who}`}
           </p>
         </div>
-        <span className="flex items-center gap-1 rounded-full bg-secondary px-2 py-1 text-xs font-medium tabular-nums text-muted-foreground">
+        <span className="flex items-center gap-1 rounded-xs border border-border/80 bg-secondary px-1.5 py-0.5 text-[11px] font-mono font-medium tabular-nums text-muted-foreground">
           <Clock className="h-3 w-3" aria-hidden />
           {minutesSince(order.createdAt)}m
         </span>

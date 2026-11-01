@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { AlertCircle, ArrowRight, KeyRound, Sparkles, UtensilsCrossed } from "lucide-react";
+import { AlertCircle, ArrowRight, KeyRound, Lock, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
@@ -48,80 +48,59 @@ export default function LoginPage() {
           return;
         }
         if (err instanceof ApiError && err.status >= 500) {
-          setError("The server is encountering an issue. Please try again shortly.");
+          setError("Server unreachable. Please verify the local service is running.");
         } else if (err instanceof ApiError) {
           setError(err.message);
         } else {
-          setError("Cannot reach the POS server. Please verify your connection.");
+          setError("Connection failed. Check network link.");
         }
       },
     });
   };
 
   return (
-    <main className="relative flex min-h-screen flex-1 items-center justify-center overflow-hidden bg-background px-4 py-12">
-      {/* Ambient background glows */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-40 left-1/2 -z-10 h-[550px] w-[900px] -translate-x-1/2 bg-[radial-gradient(ellipse_at_top,color-mix(in_oklch,var(--primary),transparent_88%),transparent_65%)]"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute bottom-0 right-10 -z-10 h-72 w-72 rounded-full bg-primary/5 blur-3xl"
-      />
-
+    <main className="relative flex min-h-screen flex-1 items-center justify-center bg-background px-4 py-12">
       <motion.div
-        initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+        initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-[420px]"
+        transition={{ duration: 0.25 }}
+        className="w-full max-w-[380px]"
       >
-        {/* Top Branding Lockup */}
-        <div className="mb-7 flex flex-col items-center gap-2 text-center">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/25 text-primary-foreground mb-1 ring-4 ring-primary/10">
-            <UtensilsCrossed className="h-6 w-6" />
+        {/* Brand Header */}
+        <div className="mb-6 flex flex-col items-center gap-1.5 text-center">
+          <div className="flex h-10 w-10 items-center justify-center rounded-md border border-border/80 bg-card text-foreground shadow-2xs mb-2">
+            <Store className="h-5 w-5 text-primary" strokeWidth={2} />
           </div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              OrderRestro
-            </h1>
-            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold tracking-wide text-primary border border-primary/20">
-              POS POS PRO
-            </span>
-          </div>
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">
+            OrderRestro
+          </h1>
           <p className="text-xs text-muted-foreground">
-            Offline-first Restaurant Management & Billing Console
+            Restaurant Operations & Point of Sale Console
           </p>
         </div>
 
-        {/* Elevated Form Card */}
-        <div className="rounded-2xl border border-border/80 bg-card/95 p-7 shadow-xl shadow-foreground/5 backdrop-blur-md">
-          {/* Quick Demo Credentials Pill */}
-          <div className="mb-6 rounded-xl border border-primary/15 bg-primary/[0.04] p-3 text-xs">
+        {/* Login Card */}
+        <div className="rounded-lg border border-border/80 bg-card p-6 shadow-sm">
+          {/* Quick Demo Credentials Bar */}
+          <div className="mb-5 rounded-md border border-border/70 bg-secondary/50 p-2.5 text-xs">
             <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-1.5 font-medium text-foreground">
-                <Sparkles className="h-3.5 w-3.5 text-primary" />
-                <span>Demo Workspace</span>
-              </div>
+              <span className="font-mono text-[11px] text-muted-foreground">
+                owner@demo.local
+              </span>
               <button
                 type="button"
                 onClick={fillDemoCredentials}
-                className="inline-flex items-center gap-1 rounded-md bg-primary px-2 py-1 text-[11px] font-medium text-primary-foreground shadow-sm transition hover:opacity-90 active:scale-95"
+                className="inline-flex items-center gap-1 rounded-sm border border-border/80 bg-card px-2 py-0.5 text-[11px] font-medium text-foreground hover:bg-muted transition-colors active:scale-95"
               >
-                Autofill Demo Login
-                <ArrowRight className="h-2.5 w-2.5" />
+                Autofill
               </button>
-            </div>
-            <div className="mt-1.5 flex items-center justify-between text-[11px] text-muted-foreground">
-              <span>User: <code className="font-mono text-foreground">owner@demo.local</code></span>
-              <span>PIN: <code className="font-mono text-foreground">1234</code></span>
             </div>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3.5">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="email" className="text-xs font-semibold text-foreground/90">
-                Email or Operator ID
+              <Label htmlFor="email" className="text-xs font-medium text-foreground">
+                Email / Operator ID
               </Label>
               <Input
                 id="email"
@@ -133,8 +112,8 @@ export default function LoginPage() {
                 spellCheck={false}
                 enterKeyHint="next"
                 autoFocus
-                className="h-10 text-sm transition-all focus-visible:ring-primary/25"
-                placeholder="owner@demo.local or phone number"
+                className="h-9 rounded-md text-xs font-normal"
+                placeholder="operator@restaurant.com"
                 {...register("email")}
               />
               {errors.email && (
@@ -143,16 +122,14 @@ export default function LoginPage() {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-xs font-semibold text-foreground/90">
-                  Password
-                </Label>
-              </div>
+              <Label htmlFor="password" className="text-xs font-medium text-foreground">
+                Password
+              </Label>
               <PasswordInput
                 id="password"
                 autoComplete="current-password"
                 enterKeyHint="go"
-                className="h-10 text-sm transition-all focus-visible:ring-primary/25"
+                className="h-9 rounded-md text-xs font-normal"
                 placeholder="••••••••••••"
                 {...register("password")}
               />
@@ -163,20 +140,18 @@ export default function LoginPage() {
 
             {needsCode && (
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="totp" className="text-xs font-semibold text-foreground/90">
-                  Two-Factor Verification Code
+                <Label htmlFor="totp" className="text-xs font-medium text-foreground">
+                  Security Code
                 </Label>
                 <Input
                   id="totp"
                   inputMode="text"
                   autoComplete="one-time-code"
                   autoFocus
-                  placeholder="6-digit authenticator code"
+                  className="h-9 rounded-md text-xs"
+                  placeholder="6-digit code"
                   {...register("totp")}
                 />
-                <p className="text-[11px] text-muted-foreground">
-                  Open your authenticator app or enter a recovery code.
-                </p>
                 {errors.totp && <p className="text-xs text-destructive">{errors.totp.message}</p>}
               </div>
             )}
@@ -184,47 +159,36 @@ export default function LoginPage() {
             {error && (
               <div
                 role="alert"
-                className="flex items-start gap-2 rounded-xl border border-destructive/25 bg-destructive/10 p-3 text-xs text-destructive"
+                className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/10 p-2.5 text-xs text-destructive"
               >
-                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                 <span>{error}</span>
               </div>
             )}
 
             <Button
               type="submit"
-              className="mt-2 h-11 w-full font-medium shadow-md shadow-primary/20 transition-all hover:shadow-lg hover:shadow-primary/30 active:scale-[0.99]"
+              className="mt-1 h-9 rounded-md font-medium text-xs tracking-wide"
               disabled={login.isPending}
             >
-              {login.isPending ? (
-                <span className="flex items-center gap-2">
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
-                  Authenticating…
-                </span>
-              ) : (
-                <span className="flex items-center gap-1.5">
-                  Sign In to Terminal
-                  <ArrowRight className="h-4 w-4" />
-                </span>
-              )}
+              {login.isPending ? "Authenticating…" : "Sign In to Terminal"}
             </Button>
           </form>
 
-          {/* Quick PIN Switch Note */}
-          <div className="mt-5 flex items-center justify-center gap-1.5 text-center text-[11px] text-muted-foreground">
-            <KeyRound className="h-3.5 w-3.5 text-muted-foreground/80" />
-            <span>Shared tills support fast 4-digit PIN handoff</span>
+          <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-center gap-1.5 text-center text-[11px] text-muted-foreground">
+            <KeyRound className="h-3 w-3 text-muted-foreground" />
+            <span>Shared terminals support 4-digit PIN handoff</span>
           </div>
         </div>
 
-        {/* Footer Navigation */}
-        <div className="mt-6 flex items-center justify-between px-2 text-xs text-muted-foreground">
+        {/* Clean Footer */}
+        <div className="mt-4 flex items-center justify-between px-1 text-xs text-muted-foreground">
           <Link href="/signup" className="hover:text-foreground hover:underline transition-colors">
-            Register new restaurant
+            Register new branch
           </Link>
-          <span className="text-muted-foreground/40">•</span>
+          <span className="text-muted-foreground/30">•</span>
           <Link href="/kiosk" className="hover:text-foreground hover:underline transition-colors">
-            Self-service kiosk mode
+            Kiosk Mode
           </Link>
         </div>
       </motion.div>

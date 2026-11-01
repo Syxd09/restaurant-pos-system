@@ -80,7 +80,7 @@ export default function ReservationsPage() {
             type="button"
             onClick={() => setChannel(key)}
             className={cn(
-              "rounded-full border px-3.5 py-1 text-xs transition-colors",
+              "rounded-md border px-3 py-1 text-xs font-medium transition-all shadow-2xs",
               channel === key
                 ? "border-primary bg-primary text-primary-foreground"
                 : "border-border text-muted-foreground hover:bg-secondary",
@@ -152,7 +152,7 @@ export default function ReservationsPage() {
                 <DropdownMenu>
                   <DropdownMenuTrigger
                     className={cn(
-                      "rounded-full px-2.5 py-1 text-xs font-medium",
+                      "rounded-xs border px-2 py-0.5 text-[11px] font-semibold",
                       STATUS_STYLES[r.status],
                     )}
                   >

@@ -294,7 +294,7 @@ function LinkCard({ href, icon: Icon, title, text }: { href: string; icon: typeo
   return (
     <Link
       href={href}
-      className="group flex items-start gap-3 rounded-2xl border border-border bg-card p-5 outline-none transition hover:border-primary/40 hover:shadow-md focus-visible:ring-2 focus-visible:ring-primary"
+      className="group flex items-start gap-3 rounded-md border border-border bg-card p-5 outline-none transition hover:border-primary/40 hover:shadow-md focus-visible:ring-2 focus-visible:ring-primary"
     >
       <Icon className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
       <div className="min-w-0">
@@ -326,7 +326,7 @@ export default function IntegrationsPage() {
           <p className="text-sm text-muted-foreground">{delivery.find((p) => p.webhookPath)?.requirements}</p>
         )}
         {isLoading ? (
-          <Skeleton className="h-40 rounded-2xl" />
+          <Skeleton className="h-40 rounded-md" />
         ) : isError ? (
           <p role="alert" className="text-sm text-destructive">
             {error instanceof ApiError ? error.message : "Could not load integrations"}

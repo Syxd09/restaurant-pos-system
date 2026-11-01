@@ -26,7 +26,7 @@ export function PosMockup() {
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
       className="relative mx-auto w-full max-w-2xl"
     >
-      <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-[0_20px_70px_-20px_rgba(0,0,0,0.35)]">
+      <div className="overflow-hidden rounded-lg border border-border/60 bg-card shadow-[0_20px_70px_-20px_rgba(0,0,0,0.35)]">
         <div className="flex items-center gap-1.5 border-b border-border/60 bg-muted/40 px-4 py-3">
           <span className="size-2.5 rounded-full bg-destructive/50" />
           <span className="size-2.5 rounded-full bg-warning/50" />
@@ -40,11 +40,11 @@ export function PosMockup() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.35, delay: 0.35 + i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-              className="flex flex-col gap-2 rounded-xl border border-border/60 bg-background p-3"
+              className="flex flex-col gap-2 rounded-md border border-border/60 bg-background p-3"
             >
               <div className="flex items-center justify-between">
                 <span className="text-sm font-semibold text-foreground">{t.table}</span>
-                <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${statusColor[t.status]}`}>
+                <span className={`rounded-xs px-2 py-0.5 text-[11px] font-medium ${statusColor[t.status]}`}>
                   {t.status}
                 </span>
               </div>
@@ -66,7 +66,7 @@ export function PosMockup() {
         initial={{ opacity: 0, x: 16, y: 10 }}
         animate={{ opacity: 1, x: 0, y: 0 }}
         transition={{ duration: 0.4, delay: 0.55, ease: [0.22, 1, 0.36, 1] }}
-        className="absolute -right-4 -bottom-6 hidden w-40 rounded-xl border border-border/60 bg-card p-3 shadow-lg sm:block"
+        className="absolute -right-4 -bottom-6 hidden w-40 rounded-md border border-border/60 bg-card p-3 shadow-lg sm:block"
       >
         <p className="text-[11px] font-medium text-muted-foreground">Table occupancy</p>
         <p className="mt-1 text-2xl font-semibold tabular-nums text-foreground">72%</p>

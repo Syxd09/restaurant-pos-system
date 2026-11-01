@@ -28,7 +28,7 @@ export function WelcomeScreen({
     <div className="flex h-full flex-col items-center justify-center gap-8 px-8 text-center">
       {menu?.logoUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={menu.logoUrl} alt="" className="h-28 w-28 rounded-3xl object-contain" />
+        <img src={menu.logoUrl} alt="" className="h-28 w-28 rounded-lg object-contain" />
       ) : (
         <UtensilsCrossed className="h-20 w-20 text-primary" aria-hidden />
       )}
@@ -45,7 +45,7 @@ export function WelcomeScreen({
         </KButton>
       )}
       {load.status === "loading" && (
-        <div role="status" aria-label="loading" className="h-[4rem] w-[22rem] animate-pulse rounded-2xl bg-secondary motion-reduce:animate-none" />
+        <div role="status" aria-label="loading" className="h-[4rem] w-[22rem] animate-pulse rounded-md bg-secondary motion-reduce:animate-none" />
       )}
       {load.status === "empty" && (
         <div className="w-full max-w-[40rem]">
@@ -110,7 +110,7 @@ function ServiceTile({ icon, label, onClick }: { icon: React.ReactNode; label: s
     <button
       type="button"
       onClick={onClick}
-      className="flex min-h-[14rem] flex-1 touch-manipulation select-none flex-col items-center justify-center gap-4 rounded-3xl border-4 border-border bg-card text-[2rem] font-bold text-foreground transition-colors hover:border-primary hover:bg-accent focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/40 active:scale-[0.98] motion-reduce:transition-none"
+      className="flex min-h-[14rem] flex-1 touch-manipulation select-none flex-col items-center justify-center gap-4 rounded-lg border-4 border-border bg-card text-[2rem] font-bold text-foreground transition-colors hover:border-primary hover:bg-accent focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/40 active:scale-[0.98] motion-reduce:transition-none"
     >
       <span className="text-primary">{icon}</span>
       {label}

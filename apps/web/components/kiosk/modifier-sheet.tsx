@@ -74,7 +74,7 @@ export function ModifierSheet({
       aria-modal="true"
       aria-label={item.name}
     >
-      <div className="flex max-h-full w-full max-w-[44rem] flex-col overflow-hidden rounded-3xl bg-card shadow-2xl">
+      <div className="flex max-h-full w-full max-w-[44rem] flex-col overflow-hidden rounded-lg bg-card shadow-2xl">
         <div className="border-b border-border p-6">
           <h2 className="text-[1.75rem] font-bold leading-tight">{item.name}</h2>
           <p className="text-[1.1rem] text-muted-foreground">{t("kiosk.modifiers.choose")}</p>
@@ -106,7 +106,7 @@ export function ModifierSheet({
                         aria-checked={on}
                         onClick={() => toggle(g.id, m.id, g.maxSelect)}
                         className={cn(
-                          "flex touch-manipulation select-none items-center justify-between gap-3 rounded-2xl border-2 px-4 text-left text-[1.1rem] font-medium",
+                          "flex touch-manipulation select-none items-center justify-between gap-3 rounded-md border-2 px-4 text-left text-[1.1rem] font-medium",
                           "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ring/40",
                           TOUCH,
                           "py-3",

@@ -90,7 +90,7 @@ export default function WebhooksPage() {
                 type="button"
                 onClick={() => toggle(e)}
                 className={cn(
-                  "rounded-full border px-3 py-1 font-mono text-xs",
+                  "rounded-md border px-2.5 py-1 font-mono text-xs shadow-2xs",
                   events.includes(e) ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted-foreground",
                 )}
               >

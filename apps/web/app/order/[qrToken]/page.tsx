@@ -285,7 +285,7 @@ export default function PublicMenuPage({
         {isLoading ? (
           <div className="flex flex-col gap-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-20 rounded-2xl" />
+              <Skeleton key={i} className="h-20 rounded-md" />
             ))}
           </div>
         ) : (
@@ -359,7 +359,7 @@ export default function PublicMenuPage({
       {status && (status.order || status.openRequests.length > 0 || data) && (
         <section className="mx-auto max-w-lg px-5 pb-6">
           {status.order && (
-            <div className="mb-4 rounded-2xl border border-border p-4">
+            <div className="mb-4 rounded-md border border-border p-4">
               <p className="text-sm font-medium text-foreground">
                 Your order #{status.order.orderNumber}
                 {status.order.acceptance === "PENDING" && " — waiting for the restaurant to confirm"}

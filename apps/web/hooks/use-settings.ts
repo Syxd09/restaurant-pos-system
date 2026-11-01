@@ -66,6 +66,10 @@ export function useSettings(branchId: string | null) {
       if (res?.restaurant?.currency) {
         setActiveCurrency(res.restaurant.currency);
       }
+      if (typeof window !== "undefined" && res?.restaurant) {
+        if (res.restaurant.name) localStorage.setItem("nodedr_restaurant_name", res.restaurant.name);
+        if (res.restaurant.logoUrl) localStorage.setItem("nodedr_logo_url", res.restaurant.logoUrl);
+      }
       return res;
     },
     enabled: !!branchId,
@@ -95,6 +99,10 @@ export function useDisplaySettings(branchId: string | null) {
       );
       if (res?.restaurant?.currency) {
         setActiveCurrency(res.restaurant.currency);
+      }
+      if (typeof window !== "undefined" && res?.restaurant) {
+        if (res.restaurant.name) localStorage.setItem("nodedr_restaurant_name", res.restaurant.name);
+        if (res.restaurant.logoUrl) localStorage.setItem("nodedr_logo_url", res.restaurant.logoUrl);
       }
       return res;
     },

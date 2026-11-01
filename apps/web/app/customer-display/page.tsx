@@ -5,8 +5,6 @@ import { subscribeDisplay, type DisplayState } from "@/lib/customer-display";
 import { formatCurrency } from "@/lib/format";
 import { playPaymentReceived } from "@/lib/celebrate";
 import { QRCodeSVG } from "qrcode.react";
-import { useBranch } from "@/hooks/use-branch";
-import { useDisplaySettings } from "@/hooks/use-settings";
 
 /**
  * Open this on the customer-facing screen (or second monitor):
@@ -15,9 +13,18 @@ import { useDisplaySettings } from "@/hooks/use-settings";
  */
 export default function CustomerDisplayPage() {
   const [state, setState] = useState<DisplayState>({ kind: "idle" });
-  const { branchId } = useBranch();
-  const { data: displaySettings } = useDisplaySettings(branchId);
-  const restaurant = displaySettings?.restaurant;
+  const [brandName, setBrandName] = useState<string>("OrderRestro");
+  const [brandLogo, setBrandLogo] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const name = localStorage.getItem("nodedr_restaurant_name");
+      const logo = localStorage.getItem("nodedr_logo_url");
+      if (name) setBrandName(name);
+      if (logo) setBrandLogo(logo);
+    }
+  }, []);
+
   useEffect(() => subscribeDisplay(setState), []);
 
   // Chime when the payment lands. Browsers only allow audio after a click on
@@ -40,17 +47,17 @@ export default function CustomerDisplayPage() {
       onClick={() => setSoundOn(true)}
     >
       {!soundOn && (
-        <p className="absolute right-4 top-4 rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
+        <p className="absolute right-4 top-4 rounded-sm border border-border px-3 py-1 text-xs text-muted-foreground">
           Tap anywhere to enable payment sound
         </p>
       )}
       {state.kind === "idle" && (
         <div className="m-auto text-center flex flex-col items-center">
-          {restaurant?.logoUrl && (
+          {brandLogo && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={restaurant.logoUrl} alt="" className="h-24 w-24 object-contain rounded-md mb-6" />
+            <img src={brandLogo} alt="" className="h-24 w-24 object-contain rounded-md mb-6" />
           )}
-          <p className="text-5xl font-bold tracking-tight">{restaurant?.name ?? "Welcome"}</p>
+          <p className="text-5xl font-bold tracking-tight">{brandName || "Welcome"}</p>
           <p className="mt-3 text-xl text-muted-foreground">Your order will appear here</p>
         </div>
       )}
@@ -84,7 +91,7 @@ export default function CustomerDisplayPage() {
             <QRCodeSVG value={state.uri} size={320} level="M" marginSize={1} />
           </div>
           <p className="mt-6 text-xl text-muted-foreground">
-            Pay {state.payee ? `to ${state.payee} ` : ""}with GPay, PhonePe, Paytm or any UPI app
+            Pay {state.payee ? `to ${state.payee} ` : brandName ? `to ${brandName} ` : ""}with GPay, PhonePe, Paytm or any UPI app
           </p>
         </div>
       )}

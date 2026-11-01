@@ -3,44 +3,54 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, type LoginDto } from "@nodedr-restaurant/types";
 import { motion, useReducedMotion } from "motion/react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { AlertCircle, ArrowRight, KeyRound, Lock, Store } from "lucide-react";
+import { AlertCircle, Lock, ShieldCheck, Store, UtensilsCrossed } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
-import { useLogin } from "@/hooks/use-auth";
+import { useCurrentUser, useLogin } from "@/hooks/use-auth";
 import { ApiError } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
   const login = useLogin();
+  const { data: auth, isSuccess } = useCurrentUser();
   const [needsCode, setNeedsCode] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const prefersReducedMotion = useReducedMotion();
+  const [brandName, setBrandName] = useState("OrderRestro");
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedName = localStorage.getItem("nodedr_restaurant_name");
+      const savedLogo = localStorage.getItem("nodedr_logo_url");
+      if (savedName) setBrandName(savedName);
+      if (savedLogo) setLogoUrl(savedLogo);
+    }
+  }, []);
+
+  // Redirect to dashboard if already authenticated
+  useEffect(() => {
+    if (isSuccess && auth?.user) {
+      router.replace("/dashboard");
+    }
+  }, [isSuccess, auth, router]);
+
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
   } = useForm<LoginDto>({ resolver: zodResolver(loginSchema) });
-
-  const fillDemoCredentials = () => {
-    setValue("email", "owner@demo.local", { shouldValidate: true });
-    setValue("password", "Password123!", { shouldValidate: true });
-    setError(null);
-  };
 
   const onSubmit = (dto: LoginDto) => {
     setError(null);
     login.mutate(dto, {
-      onSuccess: (data) => {
-        const user = (data as { user?: { roleName?: string; permissions?: string[] } }).user;
-        const rider = user?.roleName === "DELIVERY_STAFF" && user.permissions?.includes("delivery.rider");
-        router.push(rider ? "/my-deliveries" : "/dashboard");
+      onSuccess: () => {
+        router.push("/dashboard");
       },
       onError: (err) => {
         if (err instanceof ApiError && err.message === "TWO_FACTOR_REQUIRED") {
@@ -48,11 +58,11 @@ export default function LoginPage() {
           return;
         }
         if (err instanceof ApiError && err.status >= 500) {
-          setError("Server unreachable. Please verify the local service is running.");
+          setError("Server unreachable. Please verify local service is active.");
         } else if (err instanceof ApiError) {
-          setError(err.message);
+          setError(err.message === "Invalid credentials" ? "Invalid login credentials. Please check your email and password." : err.message);
         } else {
-          setError("Connection failed. Check network link.");
+          setError("Connection failed. Check network connection.");
         }
       },
     });
@@ -64,42 +74,31 @@ export default function LoginPage() {
         initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25 }}
-        className="w-full max-w-[380px]"
+        className="w-full max-w-[390px]"
       >
         {/* Brand Header */}
         <div className="mb-6 flex flex-col items-center gap-1.5 text-center">
-          <div className="flex h-10 w-10 items-center justify-center rounded-md border border-border/80 bg-card text-foreground shadow-2xs mb-2">
-            <Store className="h-5 w-5 text-primary" strokeWidth={2} />
-          </div>
-          <h1 className="text-xl font-semibold tracking-tight text-foreground">
-            OrderRestro
+          {logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={logoUrl} alt="" className="h-12 w-12 object-contain rounded-md mb-1 border border-border/60 bg-card p-1 shadow-2xs" />
+          ) : (
+            <div className="flex h-11 w-11 items-center justify-center rounded-md border border-border/80 bg-card text-foreground shadow-2xs mb-1">
+              <Store className="h-5 w-5 text-primary" strokeWidth={2} />
+            </div>
+          )}
+          <h1 className="text-xl font-bold tracking-tight text-foreground">
+            {brandName}
           </h1>
           <p className="text-xs text-muted-foreground">
-            Restaurant Operations & Point of Sale Console
+            Restaurant Operations &amp; POS Console
           </p>
         </div>
 
         {/* Login Card */}
         <div className="rounded-lg border border-border/80 bg-card p-6 shadow-sm">
-          {/* Quick Demo Credentials Bar */}
-          <div className="mb-5 rounded-md border border-border/70 bg-secondary/50 p-2.5 text-xs">
-            <div className="flex items-center justify-between gap-2">
-              <span className="font-mono text-[11px] text-muted-foreground">
-                owner@demo.local
-              </span>
-              <button
-                type="button"
-                onClick={fillDemoCredentials}
-                className="inline-flex items-center gap-1 rounded-sm border border-border/80 bg-card px-2 py-0.5 text-[11px] font-medium text-foreground hover:bg-muted transition-colors active:scale-95"
-              >
-                Autofill
-              </button>
-            </div>
-          </div>
-
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3.5">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="email" className="text-xs font-medium text-foreground">
+              <Label htmlFor="email" className="text-xs font-semibold text-foreground">
                 Email / Operator ID
               </Label>
               <Input
@@ -113,7 +112,7 @@ export default function LoginPage() {
                 enterKeyHint="next"
                 autoFocus
                 className="h-9 rounded-md text-xs font-normal"
-                placeholder="operator@restaurant.com"
+                placeholder="staff@restaurant.com"
                 {...register("email")}
               />
               {errors.email && (
@@ -122,7 +121,7 @@ export default function LoginPage() {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="password" className="text-xs font-medium text-foreground">
+              <Label htmlFor="password" className="text-xs font-semibold text-foreground">
                 Password
               </Label>
               <PasswordInput
@@ -140,7 +139,7 @@ export default function LoginPage() {
 
             {needsCode && (
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="totp" className="text-xs font-medium text-foreground">
+                <Label htmlFor="totp" className="text-xs font-semibold text-foreground">
                   Security Code
                 </Label>
                 <Input
@@ -148,7 +147,7 @@ export default function LoginPage() {
                   inputMode="text"
                   autoComplete="one-time-code"
                   autoFocus
-                  className="h-9 rounded-md text-xs"
+                  className="h-9 rounded-md text-xs font-mono"
                   placeholder="6-digit code"
                   {...register("totp")}
                 />
@@ -168,28 +167,22 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              className="mt-1 h-9 rounded-md font-medium text-xs tracking-wide"
+              className="mt-2 h-9 rounded-md font-semibold text-xs tracking-wide shadow-xs"
               disabled={login.isPending}
             >
-              {login.isPending ? "Authenticating…" : "Sign In to Terminal"}
+              {login.isPending ? "Signing In…" : "Sign In to Terminal"}
             </Button>
           </form>
 
           <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-center gap-1.5 text-center text-[11px] text-muted-foreground">
-            <KeyRound className="h-3 w-3 text-muted-foreground" />
-            <span>Shared terminals support 4-digit PIN handoff</span>
+            <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+            <span>Authorized staff &amp; team access only</span>
           </div>
         </div>
 
-        {/* Clean Footer */}
-        <div className="mt-4 flex items-center justify-between px-1 text-xs text-muted-foreground">
-          <Link href="/signup" className="hover:text-foreground hover:underline transition-colors">
-            Register new branch
-          </Link>
-          <span className="text-muted-foreground/30">•</span>
-          <Link href="/kiosk" className="hover:text-foreground hover:underline transition-colors">
-            Kiosk Mode
-          </Link>
+        {/* Clean System Footer */}
+        <div className="mt-6 text-center text-xs text-muted-foreground">
+          <span>OrderRestro Enterprise POS · Offline-First Architecture</span>
         </div>
       </motion.div>
     </main>

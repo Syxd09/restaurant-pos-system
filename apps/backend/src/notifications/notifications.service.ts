@@ -53,7 +53,7 @@ export class NotificationsService {
   // being named KITCHEN_STAFF).
   async notifyByPermission(
     branchId: string,
-    permissionKey: string,
+    permissionKey: string | string[],
     payload: NotifyPayload,
   ) {
     const recipients = await this.prisma.user.findMany({
@@ -61,8 +61,45 @@ export class NotificationsService {
         isActive: true,
         branches: { some: { branchId } },
         role: {
-          permissions: { some: { permission: { key: permissionKey } } },
+          permissions: {
+            some: {
+              permission: {
+                key: Array.isArray(permissionKey)
+                  ? { in: permissionKey }
+                  : permissionKey,
+              },
+            },
+          },
         },
+      },
+      select: { id: true },
+    });
+    if (recipients.length === 0) return;
+
+    await this.prisma.notification.createMany({
+      data: recipients.map((r) => ({
+        branchId,
+        recipientUserId: r.id,
+        type: payload.type,
+        title: payload.title,
+        body: payload.body,
+        entity: payload.entity ?? null,
+        entityId: payload.entityId ?? null,
+      })),
+    });
+
+    this.realtime.emitToUsers(
+      recipients.map((r) => r.id),
+      'notification.created',
+      payload,
+    );
+  }
+
+  async notifyBranchStaff(branchId: string, payload: NotifyPayload) {
+    const recipients = await this.prisma.user.findMany({
+      where: {
+        isActive: true,
+        branches: { some: { branchId } },
       },
       select: { id: true },
     });

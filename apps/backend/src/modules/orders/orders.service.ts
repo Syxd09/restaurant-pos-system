@@ -51,6 +51,16 @@ import {
 import { ReferralsService } from '../referrals/referrals.service';
 import { VerifactuService } from '../verifactu/verifactu.service';
 
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  INR: '₹',
+  USD: '$',
+  EUR: '€',
+  GBP: '£',
+  AED: 'AED ',
+  CAD: 'CA$',
+  AUD: 'AU$',
+};
+
 const KOT_FORWARD_STATUSES = [
   'ACCEPTED',
   'PREPARING',
@@ -453,22 +463,37 @@ export class OrdersService {
     // creation, which has already committed by this point — log and move on.
     try {
       const who = full.guestName ?? full.customer?.name ?? undefined;
+      const branchRec = await this.prisma.branch.findUnique({
+        where: { id: branchId },
+        select: { restaurant: { select: { currency: true } } },
+      });
+      const currency = branchRec?.restaurant?.currency ?? 'INR';
+      const curSymbol = CURRENCY_SYMBOLS[currency] ?? `${currency} `;
+      const formattedTotal = `${curSymbol}${Number(full.totalAmount).toFixed(2)}`;
+
+      const tableName = full.table
+        ? `Table ${full.table.number}`
+        : full.type
+          ? full.type.replace('_', ' ')
+          : 'Takeaway';
+      const notifTitle = full.table
+        ? `New Order from Table ${full.table.number}`
+        : `New Order (${tableName})`;
+      const notifBody = `${tableName}: Order #${full.orderNumber}${who ? ` (${who})` : ''} · ${formattedTotal} (${full.items.length} items)`;
+
       if (acceptance === 'PENDING') {
-        // Needs a decision: goes to anyone who can accept/cancel orders.
-        await this.notifications.notifyByPermission(branchId, 'orders.accept', {
+        await this.notifications.notifyBranchStaff(branchId, {
           type: 'order.pending',
-          title: 'New online order — accept?',
-          body: `Order ${full.orderNumber} (${full.type.replace('_', ' ')})${who ? ` — ${who}` : ''} · ₹${Number(full.totalAmount)}`,
+          title: `New Online Order · ${tableName}`,
+          body: `${notifBody} — accept?`,
           entity: 'Order',
           entityId: full.id,
         });
       } else {
-        await this.notifications.notifyByPermission(branchId, 'kds.manage', {
+        await this.notifications.notifyBranchStaff(branchId, {
           type: 'order.new',
-          title: channel === 'ONLINE' ? 'New online order' : 'New order',
-          body: full.table
-            ? `Order ${full.orderNumber} — Table ${full.table.number}`
-            : `Order ${full.orderNumber} (${full.type})`,
+          title: notifTitle,
+          body: notifBody,
           entity: 'Order',
           entityId: full.id,
         });
@@ -596,7 +621,32 @@ export class OrdersService {
     });
 
     this.realtime.emitToBranch(branchId, 'order.updated', { id: orderId });
-    return this.getOrder(branchId, updated.id);
+    const full = await this.getOrder(branchId, updated.id);
+
+    try {
+      const branchRec = await this.prisma.branch.findUnique({
+        where: { id: branchId },
+        select: { restaurant: { select: { currency: true } } },
+      });
+      const currency = branchRec?.restaurant?.currency ?? 'INR';
+      const curSymbol = CURRENCY_SYMBOLS[currency] ?? `${currency} `;
+      const formattedTotal = `${curSymbol}${Number(full.totalAmount).toFixed(2)}`;
+      const tableName = full.table ? `Table ${full.table.number}` : `Order #${full.orderNumber}`;
+
+      await this.notifications.notifyBranchStaff(branchId, {
+        type: 'order.updated',
+        title: full.table ? `Table ${full.table.number} added items` : `Order #${full.orderNumber} updated`,
+        body: `${tableName}: +${items.length} items · Total ${formattedTotal}`,
+        entity: 'Order',
+        entityId: full.id,
+      });
+    } catch (err) {
+      this.logger.warn(
+        `Failed to notify for added items on order ${full.id}: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+
+    return full;
   }
 
   // Realistic floor rule: once the kitchen has actually started cooking (or

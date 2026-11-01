@@ -22,7 +22,7 @@ export class DashboardController {
     private readonly branchAccess: BranchAccessService,
   ) {}
 
-  @Auth('dashboard.sales.view')
+  @Auth()
   @Get('summary')
   async getSummary(
     @CurrentUser() user: SessionUser,
@@ -32,7 +32,7 @@ export class DashboardController {
     return this.dashboardService.getSummary(branchId, user.permissions);
   }
 
-  @Auth('dashboard.sales.view')
+  @Auth()
   @Get('trends')
   async getTrends(
     @CurrentUser() user: SessionUser,
@@ -50,13 +50,13 @@ export class DashboardController {
   }
 
   // Each person's own layout; any signed-in user who can open the dashboard.
-  @Auth('dashboard.sales.view')
+  @Auth()
   @Get('preferences')
   getPreferences(@CurrentUser() user: SessionUser) {
     return this.dashboardService.getPreferences(user.id);
   }
 
-  @Auth('dashboard.sales.view')
+  @Auth()
   @Put('preferences')
   setPreferences(@CurrentUser() user: SessionUser, @Body() body: unknown) {
     return this.dashboardService.setPreferences(user.id, body);

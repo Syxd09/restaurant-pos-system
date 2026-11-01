@@ -23,6 +23,7 @@ import {
 import { openEntity } from "@/lib/entity-events";
 import { playNotificationFeedback } from "@/lib/notification-feedback";
 import { resolveWsUrl } from "@/lib/ws-url";
+import { toast } from "@/lib/toast";
 
 // How many alerts the live socket already rang for but the refresh has not
 // listed yet (module-level: only one bell is ever mounted).
@@ -72,12 +73,43 @@ export function NotificationBell() {
 
     const socket = io(resolveWsUrl(), { query: { branchId }, withCredentials: true });
 
-    socket.on("notification.created", () => {
+    socket.on("notification.created", (payload?: { title?: string; body?: string; entity?: string; entityId?: string }) => {
       // The refresh below will list this one; remember its id (via the poll
       // effect) as already announced by skipping it there.
       socketAnnounce.pending += 1;
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["tables"] });
       if (!mutedRef.current) playNotificationFeedback();
+      if (payload?.title) {
+        const canOpen =
+          (payload.entity === "Order" || payload.entity === "Reservation") &&
+          payload.entityId;
+        toast.info(payload.title, {
+          description: payload.body,
+          duration: 9000,
+          action: canOpen
+            ? {
+                label: "View",
+                onClick: () =>
+                  openEntity(payload.entity as "Order" | "Reservation", payload.entityId!),
+              }
+            : undefined,
+        });
+      }
+    });
+
+    socket.on("order.created", () => {
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["tables"] });
+    });
+
+    socket.on("order.updated", () => {
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["tables"] });
     });
 
     return () => {
@@ -103,6 +135,22 @@ export function NotificationBell() {
     const toAnnounce = fresh.slice(skip);
     if (toAnnounce.length === 0) return;
     if (!mutedRef.current) playNotificationFeedback();
+    for (const item of toAnnounce) {
+      const canOpen =
+        (item.entity === "Order" || item.entity === "Reservation") &&
+        item.entityId;
+      toast.info(item.title, {
+        description: item.body,
+        duration: 9000,
+        action: canOpen
+          ? {
+              label: "View",
+              onClick: () =>
+                openEntity(item.entity as "Order" | "Reservation", item.entityId!),
+            }
+          : undefined,
+      });
+    }
   }, [data]);
 
   const unreadCount = data?.unreadCount ?? 0;

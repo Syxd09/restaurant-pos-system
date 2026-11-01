@@ -32,7 +32,7 @@ export interface NavItem {
 
 export const NAV_ITEMS: NavItem[] = [
   // Service & Floor
-  { labelKey: "nav.dashboard", href: "/dashboard", icon: LayoutDashboard, permission: "dashboard.sales.view", section: "SERVICE" },
+  { labelKey: "nav.dashboard", href: "/dashboard", icon: LayoutDashboard, section: "SERVICE" },
   { labelKey: "nav.pos", href: "/pos", icon: ShoppingCart, permission: "orders.create", section: "SERVICE" },
   { labelKey: "nav.orders", href: "/orders", icon: ClipboardList, permission: "orders.create", section: "SERVICE" },
   { labelKey: "nav.tables", href: "/tables", icon: LayoutGrid, permission: "tables.view", section: "SERVICE" },

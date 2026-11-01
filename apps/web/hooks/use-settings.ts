@@ -95,13 +95,23 @@ export function useUpdateRestaurantSettings(branchId: string | null) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (dto: RestaurantSettingsDto) => api.patch("/settings/restaurant", dto),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["settings", branchId] }),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["settings"] }),
+        queryClient.invalidateQueries({ queryKey: ["branches"] }),
+        queryClient.invalidateQueries({ queryKey: ["auth"] }),
+      ]);
+    },
   });
 }
 
 export function useUploadRestaurantLogo() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (file: File) => api.upload<{ url: string }>("/settings/restaurant/logo", file),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["settings"] });
+    },
   });
 }
 
@@ -110,7 +120,13 @@ export function useUpdateBranchSettings(branchId: string | null) {
   return useMutation({
     mutationFn: (dto: BranchSettingsDto) =>
       api.patch(`/settings/branch?branchId=${branchId}`, dto),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["settings", branchId] }),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["settings"] }),
+        queryClient.invalidateQueries({ queryKey: ["branches"] }),
+        queryClient.invalidateQueries({ queryKey: ["floors", branchId] }),
+      ]);
+    },
   });
 }
 
@@ -119,6 +135,8 @@ export function useSetKiosk(branchId: string | null) {
   return useMutation({
     mutationFn: (action: "enable" | "rotate" | "disable") =>
       api.post<{ kioskToken: string | null }>(`/settings/kiosk/${action}?branchId=${branchId}`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["settings", branchId] }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["settings"] });
+    },
   });
 }

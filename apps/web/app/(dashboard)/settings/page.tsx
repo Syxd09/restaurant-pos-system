@@ -1,7 +1,7 @@
 "use client";
 
-import { ImagePlus, X } from "lucide-react";
-import { useRef, useState } from "react";
+import { Check, ImagePlus, Save, ShieldCheck, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "@/lib/toast";
 import {
   RESTAURANT_NAME_MAX_LENGTH,
@@ -45,21 +45,23 @@ export default function SettingsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-[32px] font-semibold tracking-tight text-foreground">Settings</h1>
-        <p className="text-sm text-muted-foreground">Restaurant, branch, and staff configuration</p>
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl sm:text-[32px] font-bold tracking-tight text-foreground">Settings</h1>
+          <p className="text-sm text-muted-foreground">Configure your restaurant brand, branch details, tax and hardware</p>
+        </div>
       </div>
 
       <SettingsTabs />
 
       {isLoading || !data ? (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <Skeleton className="h-72 rounded-xl" />
-          <Skeleton className="h-72 rounded-xl" />
+          <Skeleton className="h-72 rounded-md" />
+          <Skeleton className="h-72 rounded-md" />
         </div>
       ) : (
         <GeneralSettingsForm
-          key={`${data.restaurant.id}-${data.branch.id}`}
+          key={`${data.restaurant.id}-${data.branch.id}-${data.restaurant.name}-${data.branch.name}-${data.restaurant.logoUrl}`}
           restaurant={data.restaurant}
           branch={data.branch}
           branchId={branchId}
@@ -73,6 +75,18 @@ export default function SettingsPage() {
       <NotificationSettingsCard />
 
       <PrinterDiagnosticsCard />
+
+      <div className="flex items-center justify-between text-xs text-muted-foreground pt-4 border-t border-border/40">
+        <span>OrderRestro Enterprise POS · Offline-First Architecture</span>
+        <a
+          className="hover:text-foreground hover:underline transition-colors font-mono text-[11px]"
+          href="https://github.com/Syxd09/restaurant-pos-system"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          github.com/Syxd09/restaurant-pos-system
+        </a>
+      </div>
     </div>
   );
 }
@@ -87,25 +101,24 @@ function OnlineOrdersCard({
   const update = useUpdateBranchSettings(branchId);
   const save = (dto: { autoConfirmOrders?: boolean; autoConfirmReservations?: boolean }) =>
     update.mutate(dto, {
-      onSuccess: () => toast.success("Saved"),
+      onSuccess: () => toast.success("Online order preferences saved"),
       onError: (err) => toast.error(err instanceof Error ? err.message : "Could not save"),
     });
 
   return (
-    <Card className="flex flex-col gap-4 p-6">
+    <Card className="flex flex-col gap-4 p-6 rounded-lg border border-border/80">
       <div>
-        <h2 className="text-[18px] font-medium text-foreground">Online orders &amp; table bookings</h2>
+        <h2 className="text-[18px] font-semibold text-foreground">Online Orders &amp; Table Bookings</h2>
         <p className="text-sm text-muted-foreground">
-          Choose whether orders and bookings from your website are accepted automatically or wait for
-          you to accept them. You can always cancel an order or booking from its window.
+          Choose whether orders and bookings from your customer portal are accepted automatically or wait for
+          kitchen staff approval.
         </p>
       </div>
-      <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-4">
+      <div className="flex items-center justify-between gap-4 rounded-md border border-border p-4 bg-secondary/20">
         <div className="flex flex-col gap-0.5">
-          <Label htmlFor="auto-confirm-orders">Auto-confirm online orders</Label>
+          <Label htmlFor="auto-confirm-orders" className="text-sm font-medium">Auto-confirm online orders</Label>
           <p className="text-xs text-muted-foreground">
-            Off = each new order rings, then waits for you to Accept or Reject before it reaches the
-            kitchen. On = sent to the kitchen straight away.
+            Off = each new order rings and waits for staff to Accept or Reject before printing to the kitchen. On = sent to the kitchen immediately.
           </p>
         </div>
         <Switch
@@ -115,11 +128,11 @@ function OnlineOrdersCard({
           onCheckedChange={(v) => save({ autoConfirmOrders: v })}
         />
       </div>
-      <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-4">
+      <div className="flex items-center justify-between gap-4 rounded-md border border-border p-4 bg-secondary/20">
         <div className="flex flex-col gap-0.5">
-          <Label htmlFor="auto-confirm-bookings">Auto-confirm table bookings</Label>
+          <Label htmlFor="auto-confirm-bookings" className="text-sm font-medium">Auto-confirm table bookings</Label>
           <p className="text-xs text-muted-foreground">
-            Off = new bookings wait for you to Accept. On = confirmed automatically.
+            Off = new table bookings wait for staff acceptance. On = automatically confirmed for available tables.
           </p>
         </div>
         <Switch
@@ -137,26 +150,27 @@ function NotificationSettingsCard() {
   const [muted, toggleMuted] = useNotificationMute();
 
   return (
-    <Card className="flex flex-col gap-4 p-6">
+    <Card className="flex flex-col gap-4 p-6 rounded-lg border border-border/80">
       <div>
-        <h2 className="text-[18px] font-medium text-foreground">Notifications</h2>
+        <h2 className="text-[18px] font-semibold text-foreground">Audio &amp; Notifications</h2>
         <p className="text-sm text-muted-foreground">
-          New orders, table reservations, and kitchen tickets on this device.
+          Audible alerts for new orders, table reservations, and incoming kitchen tickets.
         </p>
       </div>
-      <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-4">
+      <div className="flex items-center justify-between gap-4 rounded-md border border-border p-4 bg-secondary/20">
         <div className="flex flex-col gap-0.5">
-          <Label htmlFor="notification-sound">Notification sound</Label>
+          <Label htmlFor="notification-sound" className="text-sm font-medium">Terminal notification chime</Label>
           <p className="text-xs text-muted-foreground">
-            Plays a chime for new orders, reservations, and kitchen display
-            tickets. This only affects this device/browser — mute the
-            kitchen display separately from the office if needed.
+            Plays an audio chime when new orders or KDS tickets arrive. This setting is stored per device/browser.
           </p>
         </div>
         <Switch
           id="notification-sound"
           checked={!muted}
-          onCheckedChange={() => toggleMuted()}
+          onCheckedChange={() => {
+            toggleMuted();
+            toast.success(!muted ? "Sound chime disabled" : "Sound chime enabled");
+          }}
         />
       </div>
     </Card>
@@ -172,6 +186,7 @@ function GeneralSettingsForm({
   branch: BranchSettings;
   branchId: string | null;
 }) {
+  // Restaurant State
   const [name, setName] = useState(restaurant.name);
   const [legalName, setLegalName] = useState(restaurant.legalName ?? "");
   const [logoUrl, setLogoUrl] = useState<string | null>(restaurant.logoUrl);
@@ -197,6 +212,7 @@ function GeneralSettingsForm({
   const logoInputRef = useRef<HTMLInputElement>(null);
   const uploadLogo = useUploadRestaurantLogo();
 
+  // Branch State
   const [branchName, setBranchName] = useState(branch.name);
   const [address, setAddress] = useState(branch.address ?? "");
   const [phone, setPhone] = useState(branch.phone ?? "");
@@ -210,497 +226,527 @@ function GeneralSettingsForm({
   const preset = TAX_REGIME_PRESETS[taxRegime];
 
   const updateRestaurant = useUpdateRestaurantSettings(branchId);
-  const { note: saveNote, clear: clearSaveNote, toast: saveToast } = useNoteToast();
   const updateBranch = useUpdateBranchSettings(branchId);
+  const [isSavingAll, setIsSavingAll] = useState(false);
 
-  const onSubmitRestaurant = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateRestaurant.mutate(
-      {
-        name,
-        legalName: legalName || undefined,
-        logoUrl,
-        currency,
-        timezone,
-        upiVpa: upiVpa.trim() || null,
-        upiPayeeName: upiPayeeName.trim() || null,
-        loyaltyPointValue: Number(loyaltyPointValue) || 0,
-        loyaltyEarnPerCurrency: Number(loyaltyEarnPerCurrency) || 1,
-        referralEnabled,
-        referralSharerPoints: Math.max(Math.floor(Number(referralSharerPoints) || 0), 0),
-        referralReferredPoints: Math.max(Math.floor(Number(referralReferredPoints) || 0), 0),
-        referralMinPurchase: Math.max(Number(referralMinPurchase) || 0, 0),
-        onlineMinOrderAmount: Math.max(Number(onlineMinOrder) || 0, 0),
-        onlinePriceAdjustKind: adjustKind,
-        onlinePriceAdjustValue: (adjustDir === "cheaper" ? -1 : 1) * Math.abs(Number(adjustValue) || 0),
-        maxManualDiscountPercent: Math.min(Math.max(Number(maxDiscount) || 0, 0), 100),
-        requireDiscountReason: requireReason,
-      },
-      {
-        onSuccess: () => saveToast.success("Restaurant details saved"),
-        onError: (err) => saveToast.error(err instanceof ApiError ? err.message : "Could not save"),
-      },
-    );
+  // Sync internal state if server data refreshes
+  useEffect(() => {
+    setName(restaurant.name);
+    setLegalName(restaurant.legalName ?? "");
+    setLogoUrl(restaurant.logoUrl);
+    setCurrency(restaurant.currency);
+    setTimezone(restaurant.timezone);
+    setUpiVpa(restaurant.upiVpa ?? "");
+    setUpiPayeeName(restaurant.upiPayeeName ?? "");
+    setLoyaltyPointValue(restaurant.loyaltyPointValue);
+    setLoyaltyEarnPerCurrency(String(restaurant.loyaltyEarnPerCurrency));
+    setReferralEnabled(!!restaurant.referralEnabled);
+    setReferralSharerPoints(String(restaurant.referralSharerPoints ?? 15));
+    setReferralReferredPoints(String(restaurant.referralReferredPoints ?? 10));
+    setReferralMinPurchase(String(Number(restaurant.referralMinPurchase ?? 200)));
+    setOnlineMinOrder(String(Number(restaurant.onlineMinOrderAmount ?? 0)));
+    const adj = Number(restaurant.onlinePriceAdjustValue ?? 0);
+    setAdjustKind(restaurant.onlinePriceAdjustKind ?? "PERCENT");
+    setAdjustDir(adj < 0 ? "cheaper" : "costlier");
+    setAdjustValue(String(Math.abs(adj)));
+    setMaxDiscount(String(Number(restaurant.maxManualDiscountPercent ?? 100)));
+    setRequireReason(!!restaurant.requireDiscountReason);
+
+    setBranchName(branch.name);
+    setAddress(branch.address ?? "");
+    setPhone(branch.phone ?? "");
+    setGstNumber(branch.gstNumber ?? "");
+    setCountry(branch.country);
+    setTaxRegime(branch.taxRegime);
+    setTaxMode(branch.taxMode);
+    setTaxLabel(branch.taxLabel ?? "");
+    setTaxId(branch.taxId ?? "");
+  }, [restaurant, branch]);
+
+  const saveRestaurantData = async () => {
+    return updateRestaurant.mutateAsync({
+      name: name.trim(),
+      legalName: legalName.trim() || undefined,
+      logoUrl,
+      currency: currency.trim().toUpperCase(),
+      timezone: timezone.trim(),
+      upiVpa: upiVpa.trim() || null,
+      upiPayeeName: upiPayeeName.trim() || null,
+      loyaltyPointValue: Number(loyaltyPointValue) || 0,
+      loyaltyEarnPerCurrency: Number(loyaltyEarnPerCurrency) || 1,
+      referralEnabled,
+      referralSharerPoints: Math.max(Math.floor(Number(referralSharerPoints) || 0), 0),
+      referralReferredPoints: Math.max(Math.floor(Number(referralReferredPoints) || 0), 0),
+      referralMinPurchase: Math.max(Number(referralMinPurchase) || 0, 0),
+      onlineMinOrderAmount: Math.max(Number(onlineMinOrder) || 0, 0),
+      onlinePriceAdjustKind: adjustKind,
+      onlinePriceAdjustValue: (adjustDir === "cheaper" ? -1 : 1) * Math.abs(Number(adjustValue) || 0),
+      maxManualDiscountPercent: Math.min(Math.max(Number(maxDiscount) || 0, 0), 100),
+      requireDiscountReason: requireReason,
+    });
   };
 
-  const onSubmitBranch = (e: React.FormEvent) => {
+  const saveBranchData = async () => {
+    return updateBranch.mutateAsync({
+      name: branchName.trim(),
+      address: address.trim() || undefined,
+      phone: phone.trim() || undefined,
+      gstNumber: gstNumber.trim() || undefined,
+      country: country.trim().slice(0, 2).toUpperCase(),
+      taxRegime,
+      taxMode,
+      taxLabel: taxLabel.trim() || null,
+      taxId: taxId.trim() || null,
+    });
+  };
+
+  const onSubmitRestaurant = async (e: React.FormEvent) => {
     e.preventDefault();
-    updateBranch.mutate(
-      {
-        name: branchName,
-        address: address || undefined,
-        phone: phone || undefined,
-        gstNumber: gstNumber || undefined,
-        country,
-        taxRegime,
-        taxMode,
-        taxLabel: taxLabel || null,
-        taxId: taxId || null,
-      },
-      {
-        onSuccess: () => toast.success("Branch details saved"),
-        onError: (err) => toast.error(err instanceof ApiError ? err.message : "Could not save"),
-      },
-    );
+    try {
+      await saveRestaurantData();
+      toast.success("Restaurant details saved successfully!");
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Could not save restaurant settings");
+    }
+  };
+
+  const onSubmitBranch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await saveBranchData();
+      toast.success("Branch details saved successfully!");
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Could not save branch settings");
+    }
+  };
+
+  const handleSaveAll = async () => {
+    setIsSavingAll(true);
+    try {
+      await Promise.all([saveRestaurantData(), saveBranchData()]);
+      toast.success("All restaurant and branch settings saved successfully!");
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Could not save settings. Please verify inputs.");
+    } finally {
+      setIsSavingAll(false);
+    }
   };
 
   const onRegimeChange = (value: TaxRegime | null) => {
     if (!value) return;
     setTaxRegime(value);
-    // Switching regimes resets to that regime's own mode/country by
-    // default — a picker that silently kept the old mode would quietly
-    // mis-price every item on this branch (see settings.service.ts).
     setTaxMode(TAX_REGIME_PRESETS[value].defaultMode);
     setCountry(TAX_REGIME_PRESETS[value].defaultCountry);
   };
 
+  const removeLogo = () => {
+    setLogoUrl(null);
+    if (logoInputRef.current) logoInputRef.current.value = "";
+    updateRestaurant.mutate(
+      { logoUrl: null },
+      {
+        onSuccess: () => toast.success("Logo removed successfully"),
+        onError: () => toast.error("Could not remove logo"),
+      },
+    );
+  };
+
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-      <Card className="flex flex-col gap-4 p-6">
-        <h2 className="text-[18px] font-medium text-foreground">Restaurant</h2>
-        <form onSubmit={onSubmitRestaurant} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <Label>Logo</Label>
-            <div className="flex items-center gap-4">
-              <input
-                ref={logoInputRef}
-                type="file"
-                accept="image/png,image/jpeg,image/webp,image/gif"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  uploadLogo.mutate(file, {
-                    onSuccess: (res) => setLogoUrl(res.url),
-                    onError: (err) =>
-                      toast.error(err instanceof ApiError ? err.message : "Could not upload logo"),
-                  });
-                }}
-              />
-              {logoUrl ? (
-                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-border bg-secondary">
-                  {/* eslint-disable-next-line @next/next/no-img-element -- uploaded asset served from the backend, not a Next-optimizable remote source */}
-                  <img src={logoUrl} alt="" className="h-full w-full object-contain" />
+    <div className="flex flex-col gap-4">
+      {/* Unified Fast Save Bar */}
+      <div className="flex items-center justify-between gap-3 p-3.5 rounded-md border border-border/80 bg-card shadow-2xs">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="h-4 w-4 text-primary" />
+          <span className="text-xs font-semibold text-foreground">Save Configuration</span>
+          <span className="text-[11px] text-muted-foreground hidden sm:inline">
+            Applies changes to restaurant name, branding, branch layout, and tax policies
+          </span>
+        </div>
+        <Button
+          type="button"
+          onClick={handleSaveAll}
+          disabled={isSavingAll || updateRestaurant.isPending || updateBranch.isPending}
+          className="h-8 gap-1.5 text-xs font-bold shadow-xs"
+        >
+          <Save className="h-3.5 w-3.5" />
+          <span>{isSavingAll ? "Saving All…" : "Save All Settings"}</span>
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* Left Column: Restaurant Settings */}
+        <Card className="flex flex-col gap-4 p-6 rounded-lg border border-border/80">
+          <div className="flex items-center justify-between pb-2 border-b border-border/50">
+            <div>
+              <h2 className="text-[18px] font-semibold text-foreground">Restaurant Profile</h2>
+              <p className="text-xs text-muted-foreground">Brand identity, currency, UPI, and loyalty rewards</p>
+            </div>
+          </div>
+
+          <form onSubmit={onSubmitRestaurant} className="flex flex-col gap-4">
+            {/* Logo Upload */}
+            <div className="flex flex-col gap-2">
+              <Label className="text-xs font-medium">Brand Logo</Label>
+              <div className="flex items-center gap-4">
+                <input
+                  ref={logoInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/gif"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    uploadLogo.mutate(file, {
+                      onSuccess: (res) => {
+                        setLogoUrl(res.url);
+                        // Auto-save logoUrl to restaurant immediately
+                        updateRestaurant.mutate(
+                          { logoUrl: res.url },
+                          {
+                            onSuccess: () => toast.success("Logo uploaded and saved to restaurant!"),
+                            onError: () => toast.success("Logo uploaded. Click 'Save restaurant' to apply."),
+                          },
+                        );
+                      },
+                      onError: (err) =>
+                        toast.error(err instanceof ApiError ? err.message : "Could not upload logo"),
+                    });
+                  }}
+                />
+                {logoUrl ? (
+                  <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-md border border-border bg-secondary">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={logoUrl} alt="" className="h-full w-full object-contain" />
+                    <button
+                      type="button"
+                      onClick={removeLogo}
+                      className="absolute right-0.5 top-0.5 flex h-5 w-5 items-center justify-center rounded-xs bg-background/80 text-foreground hover:bg-background transition-colors"
+                      aria-label="Remove logo"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ) : (
                   <button
                     type="button"
-                    onClick={() => {
-                      setLogoUrl(null);
-                      if (logoInputRef.current) logoInputRef.current.value = "";
-                    }}
-                    className="absolute right-0.5 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-background/80 text-foreground"
-                    aria-label="Remove logo"
+                    onClick={() => logoInputRef.current?.click()}
+                    disabled={uploadLogo.isPending}
+                    className="flex h-16 w-16 shrink-0 flex-col items-center justify-center gap-1 rounded-md border border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary transition-colors cursor-pointer"
                   >
-                    <X className="h-3 w-3" />
+                    <ImagePlus className="h-4 w-4" />
+                    <span className="text-[10px]">
+                      {uploadLogo.isPending ? "Uploading…" : "Upload"}
+                    </span>
                   </button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => logoInputRef.current?.click()}
-                  disabled={uploadLogo.isPending}
-                  className="flex h-16 w-16 shrink-0 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary"
-                >
-                  <ImagePlus className="h-4 w-4" />
-                  <span className="text-[10px]">
-                    {uploadLogo.isPending ? "Uploading…" : "Upload"}
-                  </span>
-                </button>
-              )}
-              <p className="text-xs text-muted-foreground">
-                Shows in the app sidebar and login screen instead of the OrderRestro mark.
-                Square, at least 256×256px, PNG with a transparent background works best.
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="r-name">Name</Label>
-            <Input
-              id="r-name"
-              value={name}
-              onChange={(e) => setName(e.target.value.slice(0, RESTAURANT_NAME_MAX_LENGTH))}
-              maxLength={RESTAURANT_NAME_MAX_LENGTH}
-              required
-            />
-            <p className="text-right text-xs text-muted-foreground">
-              {name.length}/{RESTAURANT_NAME_MAX_LENGTH}
-            </p>
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="r-legal">Legal name</Label>
-            <Input id="r-legal" value={legalName} onChange={(e) => setLegalName(e.target.value)} />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="r-currency">Currency</Label>
-              <Input
-                id="r-currency"
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value.toUpperCase())}
-                maxLength={3}
-                required
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="r-timezone">Timezone</Label>
-              <Input id="r-timezone" value={timezone} onChange={(e) => setTimezone(e.target.value)} required />
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2 border-t border-border pt-4">
-            <h3 className="text-sm font-medium text-foreground">Loyalty program</h3>
-            <p className="text-xs text-muted-foreground">
-              How customers earn and redeem points at checkout.
-            </p>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="r-loyalty-earn">Earn 1 point per</Label>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">{currency}</span>
-                <Input
-                  id="r-loyalty-earn"
-                  type="number"
-                  min="1"
-                  step="1"
-                  value={loyaltyEarnPerCurrency}
-                  onChange={(e) => setLoyaltyEarnPerCurrency(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="r-loyalty-value">1 point redeems for</Label>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">{currency}</span>
-                <Input
-                  id="r-loyalty-value"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={loyaltyPointValue}
-                  onChange={(e) => setLoyaltyPointValue(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-3 rounded-lg border border-border p-4">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h3 className="text-sm font-medium text-foreground">Referral rewards</h3>
+                )}
                 <p className="text-xs text-muted-foreground">
-                  Customers share a dish or their personal link. Points are paid only after the new customer&apos;s
-                  first purchase is paid. Points are worth the &ldquo;1 point redeems for&rdquo; amount above
-                  (for 100 points = {currency} 10, enter 0.10).
+                  Displays in the app sidebar and login console. PNG or WebP with transparent background recommended.
                 </p>
               </div>
-              <Switch
-                id="r-referral-enabled"
-                aria-label="Enable referral rewards"
-                checked={referralEnabled}
-                onCheckedChange={setReferralEnabled}
-              />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="r-referral-sharer">Points for the customer who shares</Label>
-                <Input
-                  id="r-referral-sharer"
-                  type="number"
-                  min="0"
-                  step="1"
-                  disabled={!referralEnabled}
-                  value={referralSharerPoints}
-                  onChange={(e) => setReferralSharerPoints(e.target.value)}
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="r-referral-referred">Points for the new customer</Label>
-                <Input
-                  id="r-referral-referred"
-                  type="number"
-                  min="0"
-                  step="1"
-                  disabled={!referralEnabled}
-                  value={referralReferredPoints}
-                  onChange={(e) => setReferralReferredPoints(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="r-referral-min">Minimum food value of the first order for rewards ({currency})</Label>
-              <Input
-                id="r-referral-min"
-                type="number"
-                min="0"
-                step="1"
-                disabled={!referralEnabled}
-                value={referralMinPurchase}
-                onChange={(e) => setReferralMinPurchase(e.target.value)}
-              />
-            </div>
-          </div>
 
-          <div className="flex flex-col gap-3 rounded-lg border border-border p-4">
-            <div>
-              <h3 className="text-sm font-medium text-foreground">Website food prices</h3>
-              <p className="text-xs text-muted-foreground">
-                Make every dish cheaper or costlier for customers ordering on your website, by a percentage or a fixed
-                amount. In-restaurant, POS and marketplace prices do not change. Leave at 0 for no change.
+            {/* Restaurant Name */}
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="r-name" className="text-xs font-medium">Restaurant Brand Name *</Label>
+              <Input
+                id="r-name"
+                value={name}
+                onChange={(e) => setName(e.target.value.slice(0, RESTAURANT_NAME_MAX_LENGTH))}
+                maxLength={RESTAURANT_NAME_MAX_LENGTH}
+                required
+                className="h-9 text-xs"
+              />
+              <p className="text-right text-[11px] text-muted-foreground">
+                {name.length}/{RESTAURANT_NAME_MAX_LENGTH}
               </p>
             </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="r-adjust-dir">Make prices</Label>
-                <select
-                  id="r-adjust-dir"
-                  className="h-10 rounded-md border border-input bg-background px-3 text-sm"
-                  value={adjustDir}
-                  onChange={(e) => setAdjustDir(e.target.value as "cheaper" | "costlier")}
-                >
-                  <option value="cheaper">Cheaper</option>
-                  <option value="costlier">Costlier</option>
-                </select>
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="r-adjust-kind">By</Label>
-                <select
-                  id="r-adjust-kind"
-                  className="h-10 rounded-md border border-input bg-background px-3 text-sm"
-                  value={adjustKind}
-                  onChange={(e) => setAdjustKind(e.target.value as "PERCENT" | "AMOUNT")}
-                >
-                  <option value="PERCENT">Percentage (%)</option>
-                  <option value="AMOUNT">Amount ({currency} per dish)</option>
-                </select>
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="r-adjust-value">{adjustKind === "PERCENT" ? "Percent" : `Amount (${currency})`}</Label>
+
+            {/* Legal Name */}
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="r-legal" className="text-xs font-medium">Legal / Registered Business Name</Label>
+              <Input
+                id="r-legal"
+                value={legalName}
+                onChange={(e) => setLegalName(e.target.value)}
+                placeholder="e.g. Acme Hospitality Pvt Ltd"
+                className="h-9 text-xs"
+              />
+            </div>
+
+            {/* Currency & Timezone */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="r-currency" className="text-xs font-medium">Currency Code *</Label>
                 <Input
-                  id="r-adjust-value"
+                  id="r-currency"
+                  value={currency}
+                  onChange={(e) => setCurrency(e.target.value.toUpperCase())}
+                  maxLength={3}
+                  required
+                  className="h-9 text-xs font-mono font-semibold"
+                  placeholder="INR, USD, EUR"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="r-timezone" className="text-xs font-medium">Timezone *</Label>
+                <Input
+                  id="r-timezone"
+                  value={timezone}
+                  onChange={(e) => setTimezone(e.target.value)}
+                  required
+                  className="h-9 text-xs"
+                  placeholder="Asia/Kolkata, UTC"
+                />
+              </div>
+            </div>
+
+            {/* UPI & Digital Payment */}
+            <div className="flex flex-col gap-2 border-t border-border/60 pt-3">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">UPI QR Payment Configuration</h3>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="r-upi" className="text-xs font-medium">UPI ID (VPA)</Label>
+                  <Input
+                    id="r-upi"
+                    value={upiVpa}
+                    onChange={(e) => setUpiVpa(e.target.value)}
+                    placeholder="merchant@bank"
+                    autoComplete="off"
+                    className="h-9 text-xs"
+                  />
+                  <p className="text-[11px] text-muted-foreground">
+                    Scannable QR at POS till and customer display with dynamic bill amount.
+                  </p>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="r-upi-name" className="text-xs font-medium">UPI Payee Display Name</Label>
+                  <Input
+                    id="r-upi-name"
+                    value={upiPayeeName}
+                    onChange={(e) => setUpiPayeeName(e.target.value)}
+                    placeholder={name}
+                    maxLength={60}
+                    className="h-9 text-xs"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Loyalty Program */}
+            <div className="flex flex-col gap-2 border-t border-border/60 pt-3">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Loyalty &amp; Points Program</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="r-loyalty-earn" className="text-xs font-medium">Earn 1 point per spend</Label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground font-mono">{currency}</span>
+                    <Input
+                      id="r-loyalty-earn"
+                      type="number"
+                      min="1"
+                      step="1"
+                      value={loyaltyEarnPerCurrency}
+                      onChange={(e) => setLoyaltyEarnPerCurrency(e.target.value)}
+                      required
+                      className="h-9 text-xs font-semibold"
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="r-loyalty-value" className="text-xs font-medium">1 point redeems for</Label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground font-mono">{currency}</span>
+                    <Input
+                      id="r-loyalty-value"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={loyaltyPointValue}
+                      onChange={(e) => setLoyaltyPointValue(e.target.value)}
+                      required
+                      className="h-9 text-xs font-semibold"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Cashier Discount Limit */}
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 border-t border-border/60 pt-3">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="r-max-discount" className="text-xs font-medium">Highest cashier discount (%)</Label>
+                <Input
+                  id="r-max-discount"
                   type="number"
                   min="0"
+                  max="100"
                   step="0.01"
-                  value={adjustValue}
-                  onChange={(e) => setAdjustValue(e.target.value)}
+                  value={maxDiscount}
+                  onChange={(e) => setMaxDiscount(e.target.value)}
+                  className="h-9 text-xs"
+                />
+              </div>
+              <label className="flex items-start gap-2 text-xs sm:pt-6 cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="mt-0.5 rounded-xs"
+                  checked={requireReason}
+                  onChange={(e) => setRequireReason(e.target.checked)}
+                />
+                <span className="text-foreground font-medium">Require reason for all manual discounts</span>
+              </label>
+            </div>
+
+            <Button
+              type="submit"
+              disabled={updateRestaurant.isPending}
+              className="self-start mt-2 h-9 text-xs font-semibold shadow-xs"
+            >
+              {updateRestaurant.isPending ? "Saving Restaurant…" : "Save Restaurant Profile"}
+            </Button>
+          </form>
+        </Card>
+
+        {/* Right Column: Branch Settings */}
+        <Card className="flex flex-col gap-4 p-6 rounded-lg border border-border/80">
+          <div className="flex items-center justify-between pb-2 border-b border-border/50">
+            <div>
+              <h2 className="text-[18px] font-semibold text-foreground">Current Branch Details</h2>
+              <p className="text-xs text-muted-foreground">Location, contact info, tax regime, and billing rules</p>
+            </div>
+          </div>
+
+          <form onSubmit={onSubmitBranch} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="b-name" className="text-xs font-medium">Branch Display Name *</Label>
+              <Input
+                id="b-name"
+                value={branchName}
+                onChange={(e) => setBranchName(e.target.value)}
+                required
+                className="h-9 text-xs font-semibold"
+                placeholder="e.g. Main Outlet / Downtown"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="b-address" className="text-xs font-medium">Physical Street Address</Label>
+              <Input
+                id="b-address"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="Building, street, neighborhood"
+                className="h-9 text-xs"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="b-phone" className="text-xs font-medium">Branch Phone Number</Label>
+                <Input
+                  id="b-phone"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+91 98765 43210"
+                  className="h-9 text-xs font-mono"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="b-gst" className="text-xs font-medium">GSTIN / Tax Registration</Label>
+                <Input
+                  id="b-gst"
+                  value={gstNumber}
+                  onChange={(e) => setGstNumber(e.target.value)}
+                  placeholder="29AAAAA0000A1Z5"
+                  className="h-9 text-xs font-mono"
                 />
               </div>
             </div>
-            <p className="text-xs text-muted-foreground" aria-live="polite">
-              {Number(adjustValue) > 0
-                ? `A ${currency} 100 dish will cost ${currency} ${Math.max(
-                    Math.round(
-                      (adjustKind === "PERCENT"
-                        ? 100 * (1 + ((adjustDir === "cheaper" ? -1 : 1) * Number(adjustValue)) / 100)
-                        : 100 + (adjustDir === "cheaper" ? -1 : 1) * Number(adjustValue)) * 100,
-                    ) / 100,
-                    0,
-                  )} on the website.`
-                : "No change to website prices."}
-            </p>
-          </div>
 
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="r-online-min">Smallest online order accepted ({currency}, 0 = no minimum)</Label>
-            <Input
-              id="r-online-min"
-              type="number"
-              min="0"
-              step="1"
-              value={onlineMinOrder}
-              onChange={(e) => setOnlineMinOrder(e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              Orders from your website or the API below this amount are refused. Marketplace orders (Zomato, Swiggy)
-              and table QR orders are not affected.
-            </p>
-          </div>
+            {/* Tax Settings */}
+            <div className="flex flex-col gap-2 border-t border-border/60 pt-3">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Tax Regime &amp; Invoicing</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="b-tax-regime" className="text-xs font-medium">Tax System</Label>
+                  <Select value={taxRegime} onValueChange={onRegimeChange}>
+                    <SelectTrigger id="b-tax-regime" className="h-9 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {TAX_REGIMES.map((regime) => (
+                        <SelectItem key={regime} value={regime} className="text-xs">
+                          {TAX_REGIME_PRESETS[regime].displayName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="r-max-discount">Highest cashier discount (%)</Label>
-              <Input
-                id="r-max-discount"
-                type="number"
-                min="0"
-                max="100"
-                step="0.01"
-                value={maxDiscount}
-                onChange={(e) => setMaxDiscount(e.target.value)}
-              />
-              <p className="text-xs text-muted-foreground">
-                100 means no limit. Owners, administrators and roles with “Discount Above the Cashier Limit” can go higher.
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="b-tax-mode" className="text-xs font-medium">Menu Pricing Mode</Label>
+                  <Select value={taxMode} onValueChange={(v) => setTaxMode(v as TaxMode)}>
+                    <SelectTrigger id="b-tax-mode" className="h-9 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="INCLUSIVE" className="text-xs">Tax-inclusive (menu price includes tax)</SelectItem>
+                      <SelectItem value="EXCLUSIVE" className="text-xs">Tax-exclusive (tax added at billing)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <p className="text-[11px] text-muted-foreground">
+                {preset.exampleRates} — configured per dish under the Menu catalog.
               </p>
             </div>
-            <label className="flex items-start gap-2 text-sm sm:pt-7">
-              <input
-                type="checkbox"
-                className="mt-1"
-                checked={requireReason}
-                onChange={(e) => setRequireReason(e.target.checked)}
-              />
-              Require a reason for every discount
-            </label>
-          </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="r-upi">UPI id (for QR payments)</Label>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="b-country" className="text-xs font-medium">Country Code (2 letters) *</Label>
+                <Input
+                  id="b-country"
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value.toUpperCase().slice(0, 2))}
+                  maxLength={2}
+                  className="h-9 text-xs font-mono font-semibold"
+                  placeholder="IN, US, GB, ES"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="b-tax-id" className="text-xs font-medium">{TAX_REGIME_PRESETS[taxRegime].taxIdLabel}</Label>
+                <Input
+                  id="b-tax-id"
+                  value={taxId}
+                  onChange={(e) => setTaxId(e.target.value)}
+                  className="h-9 text-xs font-mono"
+                  placeholder="Official tax registration"
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="b-tax-label" className="text-xs font-medium">Receipt Tax Label Override (Optional)</Label>
               <Input
-                id="r-upi"
-                value={upiVpa}
-                onChange={(e) => setUpiVpa(e.target.value)}
-                placeholder="yourshop@okbank"
-                autoComplete="off"
-              />
-              <p className="text-xs text-muted-foreground">
-                Shown as a scannable QR at checkout and on the customer display, with the exact bill amount filled in.
-              </p>
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="r-upi-name">UPI payee name</Label>
-              <Input
-                id="r-upi-name"
-                value={upiPayeeName}
-                onChange={(e) => setUpiPayeeName(e.target.value)}
-                placeholder={name}
-                maxLength={60}
+                id="b-tax-label"
+                value={taxLabel}
+                onChange={(e) => setTaxLabel(e.target.value)}
+                placeholder={preset.taxLabel}
+                className="h-9 text-xs"
               />
             </div>
-          </div>
 
-          <StatusNote note={saveNote} onClear={clearSaveNote} />
-          <Button type="submit" disabled={updateRestaurant.isPending} className="self-start">
-            {updateRestaurant.isPending ? "Saving…" : "Save restaurant"}
-          </Button>
-        </form>
-      </Card>
-
-      <Card className="flex flex-col gap-4 p-6">
-        <h2 className="text-[18px] font-medium text-foreground">This branch</h2>
-        <form onSubmit={onSubmitBranch} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="b-name">Branch name</Label>
-            <Input id="b-name" value={branchName} onChange={(e) => setBranchName(e.target.value)} required />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="b-address">Address</Label>
-            <Input id="b-address" value={address} onChange={(e) => setAddress(e.target.value)} />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="b-phone">Phone</Label>
-              <Input id="b-phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="b-gst">GST number (legacy)</Label>
-              <Input id="b-gst" value={gstNumber} onChange={(e) => setGstNumber(e.target.value)} />
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2 border-t border-border pt-4">
-            <h3 className="text-sm font-medium text-foreground">Tax</h3>
-            <p className="text-xs text-muted-foreground">
-              Picks how menu prices and receipts handle tax for this branch.
-            </p>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="b-tax-regime">Region / regime</Label>
-              <Select value={taxRegime} onValueChange={onRegimeChange}>
-                <SelectTrigger id="b-tax-regime">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {TAX_REGIMES.map((regime) => (
-                    <SelectItem key={regime} value={regime}>
-                      {TAX_REGIME_PRESETS[regime].displayName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="b-tax-mode">Menu prices are</Label>
-              <Select value={taxMode} onValueChange={(v) => setTaxMode(v as TaxMode)}>
-                <SelectTrigger id="b-tax-mode">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="INCLUSIVE">Tax-inclusive</SelectItem>
-                  <SelectItem value="EXCLUSIVE">Tax-exclusive (tax added at checkout)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            {preset.exampleRates} — set the exact rate per menu item under Menu.
-          </p>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="b-country">Country code</Label>
-              <Input
-                id="b-country"
-                value={country}
-                onChange={(e) => setCountry(e.target.value.toUpperCase())}
-                maxLength={2}
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="b-tax-id">{TAX_REGIME_PRESETS[taxRegime].taxIdLabel}</Label>
-              <Input id="b-tax-id" value={taxId} onChange={(e) => setTaxId(e.target.value)} />
-            </div>
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="b-tax-label">Receipt label override (optional)</Label>
-            <Input
-              id="b-tax-label"
-              value={taxLabel}
-              onChange={(e) => setTaxLabel(e.target.value)}
-              placeholder={preset.taxLabel}
-            />
-          </div>
-
-          <Button type="submit" disabled={updateBranch.isPending} className="self-start">
-            {updateBranch.isPending ? "Saving…" : "Save branch"}
-          </Button>
-        </form>
-      </Card>
-
-      <p className="text-xs text-muted-foreground">
-        Nodedr OrderRestro is free software under the GNU AGPL-3.0. The source code of the version
-        you are using is available to every user of this service at{" "}
-        <a
-          className="underline"
-          href="https://github.com/Raktim94/nodedr-restaurant-pos"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          github.com/Raktim94/nodedr-restaurant-pos
-        </a>
-        .
-      </p>
+            <Button
+              type="submit"
+              disabled={updateBranch.isPending}
+              className="self-start mt-2 h-9 text-xs font-semibold shadow-xs"
+            >
+              {updateBranch.isPending ? "Saving Branch…" : "Save Branch Details"}
+            </Button>
+          </form>
+        </Card>
+      </div>
     </div>
   );
 }

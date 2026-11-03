@@ -1,8 +1,9 @@
 "use client";
 
-import { Clock, Printer, Trash2, X } from "lucide-react";
+import { Check, Clock, Printer, Trash2, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
+import { useNoteToast } from "@/components/ui/status-note";
 import { ScanOrderInput } from "@/components/orders/scan-order-input";
 import { DeleteOrdersDialog } from "@/components/orders/delete-orders-dialog";
 import { ChannelBadge, TypeBadge } from "@/components/orders/channel-badges";
@@ -14,6 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { hasPermission, useCurrentUser } from "@/hooks/use-auth";
 import { useBranch } from "@/hooks/use-branch";
 import {
+  useAcceptOrder,
   useManagedOrders,
   type ManagedOrder,
   type OrderChannel,
@@ -238,11 +240,16 @@ function OrderRow({
   const name = order.guestName ?? order.customer?.name ?? "Walk-in guest";
   const summary = order.items.map((i) => `${i.quantity}× ${i.nameSnapshot}`).join(", ");
   const rejected = order.acceptance === "REJECTED";
+  const isPending = order.acceptance === "PENDING";
+  const accept = useAcceptOrder(branchId);
+  const { toast } = useNoteToast();
+
   return (
     <div
       className={cn(
-        "flex items-center justify-between gap-3 rounded-lg px-4 py-3 transition-colors duration-150 motion-reduce:transition-none hover:bg-secondary/40",
+        "flex flex-wrap items-center justify-between gap-3 rounded-lg px-4 py-3 transition-colors duration-150 hover:bg-secondary/40",
         selected && "bg-primary/5",
+        isPending && "border-l-4 border-amber-500 bg-amber-500/5 dark:bg-amber-950/10",
       )}
     >
       {selectable && (
@@ -263,16 +270,16 @@ function OrderRow({
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm font-bold text-foreground">#{order.orderNumber}</span>
             {order.table && (
-              <span className="rounded bg-primary/10 border border-primary/20 px-1.5 py-0.5 text-xs font-semibold text-primary">
+              <span className="rounded bg-primary/10 border border-primary/20 px-2 py-0.5 text-xs font-bold text-primary">
                 Table {order.table.name ?? order.table.number}
               </span>
             )}
-            <span className="text-sm font-medium text-foreground">{name}</span>
+            <span className="text-sm font-semibold text-foreground">{name}</span>
             <ChannelBadge channel={order.channel} />
             <TypeBadge type={order.type} />
-            {order.acceptance === "PENDING" && (
-              <Badge className="font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30">
-                Needs action
+            {isPending && (
+              <Badge className="font-bold bg-amber-500 text-white animate-pulse">
+                Needs Acceptance
               </Badge>
             )}
             {rejected && <Badge variant="secondary" className="font-normal">Rejected</Badge>}
@@ -280,7 +287,7 @@ function OrderRow({
               <Badge variant="secondary" className="font-normal">Cancelled</Badge>
             )}
           </div>
-          <span className="truncate text-xs text-muted-foreground">{summary}</span>
+          <p className="text-xs font-medium text-muted-foreground truncate">{summary}</p>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
           <span className="text-sm font-bold tabular-nums text-foreground">
@@ -292,19 +299,58 @@ function OrderRow({
         </div>
       </button>
 
-      {branchId && (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="h-8 shrink-0 gap-1.5 px-2.5 text-xs font-medium ml-2"
-          onClick={() => openReceiptPrint(order.id, branchId)}
-          title="Print bill / receipt"
-        >
-          <Printer className="h-3.5 w-3.5" />
-          <span>Print</span>
-        </Button>
-      )}
+      {/* Quick Action Buttons */}
+      <div className="flex shrink-0 items-center gap-2">
+        {isPending ? (
+          <>
+            <Button
+              type="button"
+              size="sm"
+              className="h-8 gap-1.5 px-3 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-all active:scale-95"
+              disabled={accept.isPending}
+              onClick={(e) => {
+                e.stopPropagation();
+                accept.mutate(order.id, {
+                  onSuccess: () => toast.success(`Order #${order.orderNumber} accepted — sent to kitchen!`),
+                  onError: (err: unknown) => toast.error(err instanceof Error ? err.message : "Failed to accept order"),
+                });
+              }}
+              title="Accept order and send to kitchen KDS"
+            >
+              <Check className="h-3.5 w-3.5" />
+              <span>{accept.isPending ? "Accepting…" : "Accept"}</span>
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-8 gap-1 px-2.5 text-xs font-semibold text-destructive hover:bg-destructive/10"
+              onClick={(e) => {
+                e.stopPropagation();
+                openEntity("Order", order.id);
+              }}
+              title="Review details or decline"
+            >
+              <X className="h-3.5 w-3.5" />
+              <span>Decline</span>
+            </Button>
+          </>
+        ) : (
+          branchId && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-8 shrink-0 gap-1.5 px-3 text-xs font-semibold hover:bg-secondary"
+              onClick={() => openReceiptPrint(order.id, branchId)}
+              title="Print receipt / bill"
+            >
+              <Printer className="h-3.5 w-3.5" />
+              <span>Print Bill</span>
+            </Button>
+          )
+        )}
+      </div>
     </div>
   );
 }

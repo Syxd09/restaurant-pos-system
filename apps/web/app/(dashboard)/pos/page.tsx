@@ -274,23 +274,27 @@ function PosPageInner() {
   return (
     <div className="flex h-[calc(100dvh-10rem)] flex-col gap-4 lg:h-[calc(100dvh-8rem)]">
       <StatusNote note={note} onClear={clearNote} />
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="min-w-0 flex-1">
-          <KitchenProgressWidget branchId={branchId} />
+      <div className="flex items-center justify-between gap-3 border-b border-border/50 pb-2.5">
+        <div className="flex items-center gap-3">
+          <h1 className="text-xl font-bold tracking-tight text-foreground">POS Till</h1>
+          <span className="inline-flex items-center gap-1.5 rounded-sm bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            Live Register
+          </span>
         </div>
-        <a
-          href="/customer-display"
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-          title="Opens the customer-facing screen in a new window — drag it to the second monitor"
-        >
-          <MonitorSmartphone className="h-3.5 w-3.5" />
-          Customer display
-        </a>
+        <div className="flex items-center gap-2">
+          <a
+            href="/customer-display"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+            title="Opens the customer-facing screen in a new window"
+          >
+            <MonitorSmartphone className="h-3.5 w-3.5" />
+            Customer screen
+          </a>
+        </div>
       </div>
-
-      <BranchNotice />
 
       {showTablePicker ? (
         <Card className="flex-1 overflow-hidden p-5">
@@ -361,6 +365,7 @@ function PosPageInner() {
                 customerPhone={customerPhone}
                 onCustomerPhoneChange={setCustomerPhone}
                 onPrintBill={handlePrintCurrentBill}
+                onClearCart={() => setLines([])}
               />
             )}
           </Card>

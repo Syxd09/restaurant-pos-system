@@ -258,7 +258,7 @@ export default function PublicMenuPage({
             <Badge variant="outline" className="font-medium">
               {data?.tableName}
             </Badge>
-            <span>Kitchen has been notified</span>
+            <span className="text-amber-600 dark:text-amber-400 font-medium">Order sent! Waiting for staff confirmation</span>
           </div>
         </div>
         <Button variant="outline" className="mt-2" onClick={() => setPlaced(null)}>

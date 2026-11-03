@@ -1,5 +1,7 @@
 "use client";
 
+import { cn } from "@/lib/utils";
+
 import { Bike, Minus, Plus, Printer, ShoppingBag, ShoppingCart, Trash2, Utensils } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -52,12 +54,14 @@ export function CartPanel({
   customerPhone = "",
   onCustomerPhoneChange,
   onPrintBill,
+  onClearCart,
 }: {
   customerName?: string;
   onCustomerNameChange?: (name: string) => void;
   customerPhone?: string;
   onCustomerPhoneChange?: (phone: string) => void;
   onPrintBill?: () => void;
+  onClearCart?: () => void;
   lines: CartLine[];
   orderType: PosOrderType;
   onOrderTypeChange: (type: PosOrderType) => void;
@@ -135,18 +139,27 @@ export function CartPanel({
       {/* Table Selector for Dine-in */}
       {orderType === "DINE_IN" && (
         <div className="flex flex-col gap-1">
-          <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-0.5">
-            Table Assignment
-          </label>
+          <div className="flex items-center justify-between px-0.5">
+            <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+              Assigned Table
+            </label>
+            {tableId && (
+              <button
+                type="button"
+                onClick={() => onTableChange("")}
+                className="text-[10px] text-muted-foreground hover:text-destructive transition-colors font-medium"
+              >
+                Clear table
+              </button>
+            )}
+          </div>
           <Select value={tableId} onValueChange={(v) => onTableChange(v ?? "")}>
-            <SelectTrigger className="w-full h-10 text-xs font-medium bg-background/80">
-              <SelectValue placeholder="Select Table…">
+            <SelectTrigger className={cn("w-full h-10 text-xs font-semibold transition-all", !tableId ? "border-primary/50 bg-primary/5 text-primary ring-1 ring-primary/20" : "bg-card")}>
+              <SelectValue placeholder="Select Table for Dine-In…">
                 {(value: string | null) => {
                   const t = tables.find((table) => table.id === value);
-                  if (!t) return "Select Table…";
-                  return `${t.name ?? `Table ${t.number}`}${
-                    t.status === "OCCUPIED" ? " • Occupied" : " • Available"
-                  }`;
+                  if (!t) return "Select Table for Dine-In…";
+                  return `Table ${t.name ?? t.number} (${t.capacity} seats · ${t.status === "OCCUPIED" ? "Occupied" : "Available"})`;
                 }}
               </SelectValue>
             </SelectTrigger>
@@ -155,7 +168,7 @@ export function CartPanel({
                 <SelectItem key={t.id} value={t.id} className="text-xs">
                   <span className="font-semibold">{t.name ?? `Table ${t.number}`}</span>
                   <span className="ml-1 text-muted-foreground">
-                    ({t.capacity} seats · {t.status.toLowerCase()})
+                    (${t.capacity} seats · ${t.status === "OCCUPIED" ? "Occupied" : "Available"})
                   </span>
                 </SelectItem>
               ))}
@@ -163,27 +176,30 @@ export function CartPanel({
           </Select>
         </div>
       )}
-      {/* Customer Name and Phone (Optional) */}
-      <div className="flex flex-col gap-1">
-        <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-0.5">
-          Customer Info (Optional)
-        </label>
-        <div className="grid grid-cols-2 gap-2">
-          <Input
-            placeholder="Guest name (opt)"
-            value={customerName}
-            onChange={(e) => onCustomerNameChange?.(e.target.value)}
-            className="h-9 text-xs"
-          />
-          <Input
-            placeholder="Phone number (opt)"
-            inputMode="tel"
-            value={customerPhone}
-            onChange={(e) => onCustomerPhoneChange?.(e.target.value)}
-            className="h-9 text-xs"
-          />
+
+      {/* Customer Details (Optional for Dine-in & Takeaway) */}
+      {orderType !== "DELIVERY" && (
+        <div className="flex flex-col gap-1">
+          <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider px-0.5">
+            Customer Details (Optional)
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            <Input
+              placeholder="Guest name"
+              value={customerName}
+              onChange={(e) => onCustomerNameChange?.(e.target.value)}
+              className="h-9 text-xs"
+            />
+            <Input
+              placeholder="Phone number"
+              inputMode="tel"
+              value={customerPhone}
+              onChange={(e) => onCustomerPhoneChange?.(e.target.value)}
+              className="h-9 text-xs"
+            />
+          </div>
         </div>
-      </div>
+      )}
 
 
       {/* Delivery Form */}
@@ -294,6 +310,22 @@ export function CartPanel({
         </div>
       )}
 
+      {/* Cart Header Bar */}
+      <div className="flex items-center justify-between px-1">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+          Ticket Items {totalItemCount > 0 ? `(${totalItemCount})` : ""}
+        </span>
+        {lines.length > 0 && onClearCart && (
+          <button
+            type="button"
+            onClick={onClearCart}
+            className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-destructive transition-colors"
+          >
+            <Trash2 className="h-3 w-3" />
+            <span>Clear</span>
+          </button>
+        )}
+      </div>
       {/* Cart Items List */}
       <div className="flex-1 overflow-y-auto rounded-md border border-border/60 bg-background/50 p-2">
         {lines.length === 0 ? (
@@ -414,6 +446,12 @@ export function CartPanel({
                 : "Send to Kitchen"}
           </Button>
         </div>
+
+        {orderType === "DINE_IN" && !tableId && lines.length > 0 && (
+          <p className="text-[11px] font-medium text-amber-600 dark:text-amber-400 text-center">
+            ⚠️ Select an Assigned Table above to send order
+          </p>
+        )}
 
         {existingOrderNumber && onViewExistingOrder && (
           <Button

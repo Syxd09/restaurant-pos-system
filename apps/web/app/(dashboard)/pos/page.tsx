@@ -27,6 +27,7 @@ import {
 import { useFloors, type RestaurantTable } from "@/hooks/use-tables";
 import { ApiError } from "@/lib/api";
 import { formatCurrency } from "@/lib/format";
+import { openReceiptPrint } from "@/lib/print";
 import { cn } from "@/lib/utils";
 
 export default function PosPage() {
@@ -47,6 +48,8 @@ function PosPageInner() {
 
   const [lines, setLines] = useState<CartLine[]>([]);
   const [orderType, setOrderType] = useState<PosOrderType>("DINE_IN");
+  const [customerName, setCustomerName] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
   const [delivery, setDelivery] = useState<DeliveryDetails>({ address: "", pincode: "", phone: "" });
   const [scheduledFor, setScheduledFor] = useState("");
   const [tableId, setTableIdRaw] = useState(preselectedTableId);
@@ -235,8 +238,27 @@ function PosPageInner() {
     setSelectedBillId(null);
     setTableIdRaw("");
     setActiveCustomer(null);
+    setCustomerName("");
+    setCustomerPhone("");
     setDelivery({ address: "", pincode: "", phone: "" });
     setScheduledFor("");
+  };
+
+  const handlePrintCurrentBill = () => {
+    if (existingOrder && branchId) {
+      openReceiptPrint(existingOrder.id, branchId);
+      return;
+    }
+    if (activeOrder && branchId) {
+      openReceiptPrint(activeOrder.id, branchId);
+      return;
+    }
+    if (lines.length > 0) {
+      toast.info("Sending order to kitchen first before printing...");
+      handleSubmit();
+      return;
+    }
+    toast.error("No active order to print");
   };
 
   const handleTablePick = (table: RestaurantTable) => setTableId(table.id);
@@ -247,7 +269,7 @@ function PosPageInner() {
   // mid-flow (tableId set, or viewing/paying an order) skip straight past
   // it, same as arriving here from the Tables page's own "New order" link
   // (?tableId=... pre-fills this and never shows the picker).
-  const showTablePicker = orderType === "DINE_IN" && !tableId && !activeOrder;
+  const showTablePicker = false; // Always keep product grid accessible
 
   return (
     <div className="flex h-[calc(100dvh-10rem)] flex-col gap-4 lg:h-[calc(100dvh-8rem)]">
@@ -334,6 +356,11 @@ function PosPageInner() {
                 scheduledFor={scheduledFor}
                 onScheduledForChange={setScheduledFor}
                 branchId={branchId}
+                customerName={customerName}
+                onCustomerNameChange={setCustomerName}
+                customerPhone={customerPhone}
+                onCustomerPhoneChange={setCustomerPhone}
+                onPrintBill={handlePrintCurrentBill}
               />
             )}
           </Card>

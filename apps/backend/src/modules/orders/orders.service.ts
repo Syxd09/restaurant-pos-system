@@ -266,6 +266,30 @@ export class OrdersService {
         throw new BadRequestException('Table is invalid for this branch');
       }
     }
+    if (!dto.customerId && dto.customerPhone?.trim()) {
+      const cleanPhone = dto.customerPhone.trim();
+      let customer = await this.prisma.customer.findFirst({
+        where: { branchId, phone: cleanPhone },
+      });
+      if (!customer) {
+        customer = await this.prisma.customer.create({
+          data: {
+            branchId,
+            phone: cleanPhone,
+            name: dto.customerName?.trim() || dto.guestName?.trim() || 'Walk-in guest',
+          },
+        });
+      } else if (dto.customerName?.trim() && !customer.name) {
+        customer = await this.prisma.customer.update({
+          where: { id: customer.id },
+          data: { name: dto.customerName.trim() },
+        });
+      }
+      dto.customerId = customer.id;
+    }
+    if (dto.customerName?.trim() && !dto.guestName) {
+      dto.guestName = dto.customerName.trim();
+    }
     if (dto.customerId) {
       const customer = await this.prisma.customer.findFirst({
         where: { id: dto.customerId, branchId },

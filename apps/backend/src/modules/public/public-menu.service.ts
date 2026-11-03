@@ -104,19 +104,8 @@ export class PublicMenuService {
     const table = await this.resolveTable(qrToken);
     const branchId = table.floor.branchId;
 
-    // A guest who already ordered once this visit and scans again to add
-    // more (e.g. drinks now, food later) should land on the same tab, not
-    // open a second order for the table — mirrors how staff add a round
-    // from the POS for an occupied table.
-    const openOrder = await this.prisma.order.findFirst({
-      where: { branchId, tableId: table.id, status: 'OPEN' },
-    });
-    if (openOrder) {
-      return this.ordersService.addItems(branchId, openOrder.id, items, {
-        enforceModifierLimits: true,
-        websiteOnly: true,
-      });
-    }
+    // Customer orders from mobile QR always require staff review and acceptance
+    // in the 'New (to accept)' orders screen before sending tickets to the kitchen.
 
     // A guest scanning a QR code has no staff account, but Order.createdById
     // is a required FK — attribute the order to whoever is on the floor for
@@ -152,6 +141,7 @@ export class PublicMenuService {
       },
       {
         channel: 'ONLINE',
+        requireAcceptance: true,
         priceAdjust: adjust,
         minOrderAmount: minOrder > 0 ? minOrder : undefined,
       },

@@ -85,7 +85,7 @@ function toKotOrder(order: ReceiptData): EscposKotOrder {
     table: order.table
       ? { label: order.table.name ?? `#${order.table.number}` }
       : null,
-    customer: order.customer ? { name: order.customer.name ?? 'Guest' } : null,
+    customer: order.customer ? { name: order.customer.name ?? 'Guest' } : order.guestName ? { name: order.guestName } : null,
     items: order.items.map((item) => ({
       nameSnapshot: item.nameSnapshot,
       quantity: item.quantity,
@@ -124,7 +124,9 @@ function toEscposOrder(
       : null,
     customer: order.customer
       ? { name: order.customer.name ?? 'Guest', phone: order.customer.phone }
-      : null,
+      : order.guestName
+        ? { name: order.guestName, phone: null }
+        : null,
     subtotal: Number(order.subtotal),
     discountAmount: Number(order.discountAmount),
     taxAmount: Number(order.taxAmount),

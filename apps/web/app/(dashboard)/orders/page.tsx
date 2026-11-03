@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock, Trash2, X } from "lucide-react";
+import { Clock, Printer, Trash2, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { ScanOrderInput } from "@/components/orders/scan-order-input";
@@ -21,6 +21,7 @@ import {
 } from "@/hooks/use-orders";
 import { formatCurrency } from "@/lib/format";
 import { openEntity } from "@/lib/entity-events";
+import { openReceiptPrint } from "@/lib/print";
 import { cn } from "@/lib/utils";
 
 const TABS: { key: OrderTab; label: string }[] = [
@@ -154,6 +155,7 @@ function OrdersView() {
             <OrderRow
               key={o.id}
               order={o}
+              branchId={branchId}
               selectable={selectable && (o.status === "PAID" || o.status === "CANCELLED")}
               selected={selected.has(o.id)}
               onToggle={() => toggle(o.id)}
@@ -222,11 +224,13 @@ function OrdersView() {
 
 function OrderRow({
   order,
+  branchId,
   selectable,
   selected,
   onToggle,
 }: {
   order: ManagedOrder;
+  branchId: string | null;
   selectable: boolean;
   selected: boolean;
   onToggle: () => void;
@@ -237,7 +241,7 @@ function OrderRow({
   return (
     <div
       className={cn(
-        "flex items-start gap-1 rounded-lg transition-colors duration-150 motion-reduce:transition-none",
+        "flex items-center gap-1 rounded-lg transition-colors duration-150 motion-reduce:transition-none hover:bg-secondary/30",
         selected && "bg-primary/5",
       )}
     >
@@ -250,36 +254,61 @@ function OrderRow({
           />
         </div>
       )}
-    <button
-      type="button"
-      onClick={() => openEntity("Order", order.id)}
-      className="flex flex-1 items-start justify-between gap-4 rounded-lg px-4 py-3 text-left transition hover:bg-secondary/50"
-    >
-      <div className="flex min-w-0 flex-col gap-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm font-semibold text-foreground">#{order.orderNumber}</span>
-          <span className="text-sm text-foreground">{name}</span>
-          <ChannelBadge channel={order.channel} />
-          <TypeBadge type={order.type} />
-          {order.acceptance === "PENDING" && (
-            <Badge className="font-normal">Needs action</Badge>
-          )}
-          {rejected && <Badge variant="secondary" className="font-normal">Rejected</Badge>}
-          {!rejected && order.status === "CANCELLED" && (
-            <Badge variant="secondary" className="font-normal">Cancelled</Badge>
+      <button
+        type="button"
+        onClick={() => openEntity("Order", order.id)}
+        className="flex flex-1 items-start justify-between gap-4 rounded-lg px-4 py-3 text-left transition"
+      >
+        <div className="flex min-w-0 flex-col gap-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm font-bold text-foreground">#{order.orderNumber}</span>
+            {order.table && (
+              <span className="rounded bg-primary/10 border border-primary/20 px-1.5 py-0.5 text-xs font-semibold text-primary">
+                Table {order.table.name ?? order.table.number}
+              </span>
+            )}
+            <span className="text-sm font-medium text-foreground">{name}</span>
+            <ChannelBadge channel={order.channel} />
+            <TypeBadge type={order.type} />
+            {order.acceptance === "PENDING" && (
+              <Badge className="font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                Needs action
+              </Badge>
+            )}
+            {rejected && <Badge variant="secondary" className="font-normal">Rejected</Badge>}
+            {!rejected && order.status === "CANCELLED" && (
+              <Badge variant="secondary" className="font-normal">Cancelled</Badge>
+            )}
+          </div>
+          <span className="truncate text-xs text-muted-foreground">{summary}</span>
+        </div>
+        <div className="flex shrink-0 items-center gap-3">
+          <div className="flex flex-col items-end gap-1">
+            <span className="text-sm font-bold tabular-nums text-foreground">
+              {formatCurrency(order.totalAmount)}
+            </span>
+            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Clock className="h-3 w-3" /> {timeAgo(order.createdAt)}
+            </span>
+          </div>
+          {branchId && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-8 gap-1.5 px-2.5 text-xs font-medium"
+              onClick={(e) => {
+                e.stopPropagation();
+                openReceiptPrint(order.id, branchId);
+              }}
+              title="Print bill / receipt"
+            >
+              <Printer className="h-3.5 w-3.5" />
+              <span>Print</span>
+            </Button>
           )}
         </div>
-        <span className="truncate text-xs text-muted-foreground">{summary}</span>
-      </div>
-      <div className="flex shrink-0 flex-col items-end gap-1">
-        <span className="text-sm font-medium tabular-nums text-foreground">
-          {formatCurrency(order.totalAmount)}
-        </span>
-        <span className="flex items-center gap-1 text-xs text-muted-foreground">
-          <Clock className="h-3 w-3" /> {timeAgo(order.createdAt)}
-        </span>
-      </div>
-    </button>
+      </button>
     </div>
   );
 }

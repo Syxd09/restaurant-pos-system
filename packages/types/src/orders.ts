@@ -97,6 +97,8 @@ export const createOrderSchema = z.object({
   tableId: z.string().optional(),
   guestCount: z.number().int().positive().optional(),
   customerId: z.string().optional(),
+  customerName: z.string().trim().max(60).optional(),
+  customerPhone: z.string().trim().max(20).optional(),
   guestName: z.string().trim().min(1).max(60).optional(),
   notes: z.string().optional(),
   // Required when type is DELIVERY (validated against the branch's zones).

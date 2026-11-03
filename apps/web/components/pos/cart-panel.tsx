@@ -1,6 +1,6 @@
 "use client";
 
-import { Bike, Minus, Plus, ShoppingBag, ShoppingCart, Trash2, Utensils } from "lucide-react";
+import { Bike, Minus, Plus, Printer, ShoppingBag, ShoppingCart, Trash2, Utensils } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -47,7 +47,17 @@ export function CartPanel({
   scheduledFor,
   onScheduledForChange,
   branchId = null,
+  customerName = "",
+  onCustomerNameChange,
+  customerPhone = "",
+  onCustomerPhoneChange,
+  onPrintBill,
 }: {
+  customerName?: string;
+  onCustomerNameChange?: (name: string) => void;
+  customerPhone?: string;
+  onCustomerPhoneChange?: (phone: string) => void;
+  onPrintBill?: () => void;
   lines: CartLine[];
   orderType: PosOrderType;
   onOrderTypeChange: (type: PosOrderType) => void;
@@ -153,6 +163,28 @@ export function CartPanel({
           </Select>
         </div>
       )}
+      {/* Customer Name and Phone (Optional) */}
+      <div className="flex flex-col gap-1">
+        <label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-0.5">
+          Customer Info (Optional)
+        </label>
+        <div className="grid grid-cols-2 gap-2">
+          <Input
+            placeholder="Guest name (opt)"
+            value={customerName}
+            onChange={(e) => onCustomerNameChange?.(e.target.value)}
+            className="h-9 text-xs"
+          />
+          <Input
+            placeholder="Phone number (opt)"
+            inputMode="tel"
+            value={customerPhone}
+            onChange={(e) => onCustomerPhoneChange?.(e.target.value)}
+            className="h-9 text-xs"
+          />
+        </div>
+      </div>
+
 
       {/* Delivery Form */}
       {orderType === "DELIVERY" && (
@@ -357,17 +389,42 @@ export function CartPanel({
           </span>
         </div>
 
-        <Button
-          className="h-11 w-full text-xs font-bold uppercase tracking-wide shadow-md shadow-primary/20 transition-all hover:shadow-lg hover:shadow-primary/30 active:scale-[0.99]"
-          disabled={!canSubmit}
-          onClick={onSubmit}
-        >
-          {isSubmitting
-            ? "Sending Order…"
-            : existingOrderNumber
-              ? `Add to #${existingOrderNumber} & Send`
-              : "Send to Kitchen"}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            className="h-11 flex-1 text-xs font-semibold gap-1.5"
+            disabled={!existingOrderNumber && lines.length === 0}
+            onClick={onPrintBill}
+            title="Print bill / receipt"
+          >
+            <Printer className="h-4 w-4" />
+            <span>Print Bill</span>
+          </Button>
+
+          <Button
+            className="h-11 flex-[2] text-xs font-bold uppercase tracking-wide shadow-md shadow-primary/20 transition-all hover:shadow-lg hover:shadow-primary/30 active:scale-[0.99]"
+            disabled={!canSubmit}
+            onClick={onSubmit}
+          >
+            {isSubmitting
+              ? "Sending…"
+              : existingOrderNumber
+                ? `Add to #${existingOrderNumber} & Send`
+                : "Send to Kitchen"}
+          </Button>
+        </div>
+
+        {existingOrderNumber && onViewExistingOrder && (
+          <Button
+            type="button"
+            variant="secondary"
+            className="h-9 w-full text-xs font-semibold"
+            onClick={onViewExistingOrder}
+          >
+            Pay & Settle #{existingOrderNumber}
+          </Button>
+        )}
       </div>
     </div>
   );

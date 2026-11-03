@@ -22,6 +22,19 @@ const SECURITY_HEADERS = [
 ];
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: [
+    "*.ngrok-free.app",
+    "**.ngrok-free.app",
+    "*.ngrok.io",
+    "**.ngrok.io",
+    "*.ngrok.app",
+    "**.ngrok.app",
+    "*.loca.lt",
+    "**.loca.lt",
+    "192.168.31.112",
+    "localhost",
+    "127.0.0.1",
+  ],
   output: "standalone",
   images: {
     // The backend's upload folder (proxied through /api) plus the app's own

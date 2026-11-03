@@ -101,6 +101,14 @@ async function bootstrap() {
 
   app.use(
     helmet({
+      contentSecurityPolicy: {
+        directives: {
+          ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+          'script-src': ["'self'", "'unsafe-inline'"],
+          'style-src': ["'self'", "'unsafe-inline'"],
+          'img-src': ["'self'", 'data:', 'blob:'],
+        },
+      },
       // Uploaded images are fetched cross-origin-ish (via the frontend's
       // same-origin /api proxy, but still through an <img> tag) — the
       // default helmet CORP header blocks that in some browsers.

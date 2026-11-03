@@ -241,12 +241,12 @@ function OrderRow({
   return (
     <div
       className={cn(
-        "flex items-center gap-1 rounded-lg transition-colors duration-150 motion-reduce:transition-none hover:bg-secondary/30",
+        "flex items-center justify-between gap-3 rounded-lg px-4 py-3 transition-colors duration-150 motion-reduce:transition-none hover:bg-secondary/40",
         selected && "bg-primary/5",
       )}
     >
       {selectable && (
-        <div className="flex h-full items-center py-4 pl-4">
+        <div className="flex shrink-0 items-center">
           <Checkbox
             checked={selected}
             onCheckedChange={onToggle}
@@ -257,7 +257,7 @@ function OrderRow({
       <button
         type="button"
         onClick={() => openEntity("Order", order.id)}
-        className="flex flex-1 items-start justify-between gap-4 rounded-lg px-4 py-3 text-left transition"
+        className="flex min-w-0 flex-1 items-start justify-between gap-4 text-left transition"
       >
         <div className="flex min-w-0 flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -282,33 +282,29 @@ function OrderRow({
           </div>
           <span className="truncate text-xs text-muted-foreground">{summary}</span>
         </div>
-        <div className="flex shrink-0 items-center gap-3">
-          <div className="flex flex-col items-end gap-1">
-            <span className="text-sm font-bold tabular-nums text-foreground">
-              {formatCurrency(order.totalAmount)}
-            </span>
-            <span className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Clock className="h-3 w-3" /> {timeAgo(order.createdAt)}
-            </span>
-          </div>
-          {branchId && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="h-8 gap-1.5 px-2.5 text-xs font-medium"
-              onClick={(e) => {
-                e.stopPropagation();
-                openReceiptPrint(order.id, branchId);
-              }}
-              title="Print bill / receipt"
-            >
-              <Printer className="h-3.5 w-3.5" />
-              <span>Print</span>
-            </Button>
-          )}
+        <div className="flex shrink-0 flex-col items-end gap-1">
+          <span className="text-sm font-bold tabular-nums text-foreground">
+            {formatCurrency(order.totalAmount)}
+          </span>
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Clock className="h-3 w-3" /> {timeAgo(order.createdAt)}
+          </span>
         </div>
       </button>
+
+      {branchId && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="h-8 shrink-0 gap-1.5 px-2.5 text-xs font-medium ml-2"
+          onClick={() => openReceiptPrint(order.id, branchId)}
+          title="Print bill / receipt"
+        >
+          <Printer className="h-3.5 w-3.5" />
+          <span>Print</span>
+        </Button>
+      )}
     </div>
   );
 }

@@ -476,6 +476,10 @@ export class OrdersController {
           : await this.verifactu.qrForOrder(order.id),
       },
     });
+    res.setHeader(
+      'Content-Security-Policy',
+      "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:;",
+    );
     res.type('html').send(html);
   }
 
